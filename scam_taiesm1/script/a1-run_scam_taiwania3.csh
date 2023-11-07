@@ -30,6 +30,10 @@ module load cmake/3.15.4 compiler/intel/2020u4 IntelMPI/2020 netcdf-4.8.0-NC4-in
 set CAM_ROOT  = /home/j07hsu00/taiesm/ver170803
 set CSMDATA = /home/j07hsu00/taiesm/inputdata
 
+set NCHOME = /home/yhtseng00/netcdf-4.8.0-NC4-intel2020-impi/
+setenv INC_NETCDF ${NCHOME}/include
+setenv LIB_NETCDF ${NCHOME}/lib
+
 set USER_FC = "ifort"
 
 #########################################################################
