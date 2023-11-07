@@ -74,7 +74,7 @@ endif
 ## configure
 ##--------------------------
 cd $BLDDIR || exit 1
-$CAM_ROOT/models/atm/cam/bld/configure -s -chem $aero_mode -dyn eul -res 64x128 -nospmd -nosmp -scam -ocn dom -comp_intf mct -phys cam5 -debug -fc $USER_FC
+$CAM_ROOT/models/atm/cam/bld/configure -s -chem $aero_mode -dyn eul -res 64x128 -nospmd -nosmp -scam -ocn dom -comp_intf mct -phys cam5 -debug -fc $USER_FC -ldflags -static-intel
 
 ##--------------------------
 ## compile
@@ -86,5 +86,22 @@ echo ""
 gmake -j >&! MAKE.out || echo "ERROR: Compile failed. Check out MAKE.out [$BLDDIR/MAKE.out]" && exit 1
 #gmake -j >&! MAKE.out #|| echo "ERROR: Compile failed for' bld_${levarr}_${aero_mode} - exiting run_scam" && exit 1
 #gmake -j > MAKE.out || echo "ERROR: Compile failed for' bld_${levarr}_${aero_mode} - exiting run_scam" && exit 1
+
+exit 0
+
+#--------------------------
+## Build the namelist with extra fields needed for scam diagnostics
+##--------------------------
+
+cat <<EOF >! tmp_namelistfile
+&camexp 
+    history_budget       = .true.,
+    nhtfrq               = -3, 
+    print_energy_errors=.true., 
+/
+EOF
+
+$CAM_ROOT/models/atm/cam/bld/build-namelist -s -infile tmp_namelistfile -use_case scam_${iopname} -csmdata $CSMDATA \
+    || echo "build-namelist failed" && exit 1
 
 
