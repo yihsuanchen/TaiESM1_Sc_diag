@@ -1,4 +1,24 @@
 #!/bin/csh -f
+#SBATCH -A MST112228        # Account name/project number
+#SBATCH -J scam_taiesm1     # Job name
+#SBATCH -p ctest             # Partition name
+#SBATCH -n 1               # Number of MPI tasks (i.e. processes)
+#SBATCH -c 1                # Number of cores per MPI task
+#SBATCH -N 1                # Maximum number of nodes to be allocated
+#SBATCH -o %j.out           # Path to the standard output file
+#SBATCH -e %j.err           # Path to the standard error ouput file
+#SBATCH --mail-user=yihsuanc@gate.sinica.edu.tw
+#SBATCH --mail-type=FAIL
+
+#--- copby from CJ's case.st_archive  ---
+##SBATCH0  --job-name=st_archive.SCAM_t1
+##SBATCH0  --nodes=1
+##SBATCH0  --ntasks-per-node=1
+##SBATCH0  --output=st_archive.SCAM_t1   
+##SBATCH0  --exclusive                        
+##SBATCH0  -o /home/cjshiu1972/runs/cesm/stdout/cesm.stdout.%J  
+##SBATCH0  -e /home/cjshiu1972/runs/cesm/stdout/cesm.stderr.%J  
+
 #===================================
 #  Description:
 #    Running single-column version of TaiESM1 on Taiwania 3
@@ -11,7 +31,7 @@
 #===================================
 #
 
-# echo command echoing
+# command echoing
 set echo
 
 # -------------------------------------------------------------------------
@@ -21,6 +41,7 @@ set echo
 source /opt/ohpc/admin/lmod/8.1.18/init/csh
 setenv MODULEPATH /home/yhtseng00/modules:/opt/ohpc/Taiwania3/modulefiles:/opt/ohpc/Taiwania3/pkg/lmod/comp/intel/2020:/opt/ohpc/pub/modulefiles
 module purge
+#module load cmake/3.15.4 compiler/intel/2020u4 netcdf-4.8.0-NC4-intel2020-impi pnetcdf-1.8.1-intel2020-impi
 module load cmake/3.15.4 compiler/intel/2020u4 IntelMPI/2020 netcdf-4.8.0-NC4-intel2020-impi pnetcdf-1.8.1-intel2020-impi
 
 # -------------------------------------------------------------------------
@@ -53,6 +74,9 @@ set RUNDIR = $WRKDIR/$CASE/run
 mkdir -p $BLDDIR || exit 1
 mkdir -p $RUNDIR || exit 1
 
+set this_script = "`pwd`/$0"
+cp $this_script $BLDDIR || exit 1
+
 #########################################################################
 ### Set some case specific parameters here
 ### Here the boundary layer cases use prescribed aerosols while the deep convection
@@ -78,6 +102,7 @@ endif
 cd $BLDDIR || exit 1
 #$CAM_ROOT/models/atm/cam/bld/configure -s -chem $aero_mode -dyn eul -res 64x128 -nospmd -nosmp -scam -ocn dom -comp_intf mct -phys cam5 -debug -fc $USER_FC -ldflags -static-intel
 $CAM_ROOT/models/atm/cam/bld/configure -s -chem $aero_mode -dyn eul -res 64x128 -nospmd -nosmp -scam -ocn dom -comp_intf mct -phys cam5 -debug -fc $USER_FC
+#$CAM_ROOT/models/atm/cam/bld/configure -s -chem $aero_mode -dyn eul -res 64x128 -scam -ocn dom -comp_intf mct -phys cam5 -debug -fc $USER_FC
 
 ##--------------------------
 ## compile
@@ -87,7 +112,8 @@ echo ""
 echo " -- Compile"
 echo ""
 gmake -j LDFLAGS="" >&! MAKE.out || echo "ERROR: Compile failed. Check out MAKE.out [$BLDDIR/MAKE.out]" && exit 1
-#gmake -j >&! MAKE.out #|| echo "ERROR: Compile failed for' bld_${levarr}_${aero_mode} - exiting run_scam" && exit 1
+
+#gmake -j >&! MAKE.out || echo "ERROR: Compile failed for' bld_${levarr}_${aero_mode} - exiting run_scam" && exit 1
 #gmake -j > MAKE.out || echo "ERROR: Compile failed for' bld_${levarr}_${aero_mode} - exiting run_scam" && exit 1
 
 ##--------------------------
@@ -117,7 +143,7 @@ echo ""
 echo " -- Running SCAM in $RUNDIR"
 echo ""
 ###./cam >&! scam_output.txt
-./cam > scam_output.txt
+./cam > scam_output.txt || echo "ERROR: Running SCAM failed... check out log file [$RUNDIR/scam_output.txt]" && exit 99
 
 exit 0
 
