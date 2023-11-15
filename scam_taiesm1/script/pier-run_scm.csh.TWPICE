@@ -1,0 +1,106 @@
+#!/bin/csh
+
+#-----------------------------------------------------------------------
+## Run script for running CAM in single column mode on a pc platform.
+## This runs a low resolution
+## T5 Eulerian Spectral case in serial mode.
+#-----------------------------------------------------------------------
+##
+
+## Do our best to get sufficient stack memory
+#limit stacksize unlimited
+
+## Choose FORTRAN compiler and associated netcdf
+#source $MODULESHOME/init/csh
+#module purge
+##module add intel/ifort-10.1 netcdf-4.1.3/intel-10.1 intel/icc-10.1 mvapich2-1.8a1p1/intel-10.1
+#module load intel/comp-12.1
+#module load mvapich2-1.9/intel-12.1
+#module load netcdf-4.1.3/intel-12.1
+#module load cmake/2.8.12.2_intel-12.1
+#module list
+setenv NETCDF /opt/netcdf362
+#set USER_CC = gcc
+set USER_FC = pgf90  
+
+setenv INC_NETCDF ${NETCDF}/include
+setenv LIB_NETCDF ${NETCDF}/lib
+
+## ROOT OF CAM DISTRIBUTION - probably needs to be customized.
+## Contains the source code for the CAM distribution.
+## (the root directory contains the subdirectory "models")
+set camroot      = /raid11/pier/SCM/cesm1_2_2
+
+## ROOT OF CAM DATA DISTRIBUTION - needs to be customized unless running at NCAR.
+## Contains the initial and boundary data for the CAM distribution.
+## (the root directory contains the subdirectories "atm" and "lnd")
+# setenv CSMDATA    /raid11/feitenie/SCAM/SCM/TWP06_4scam.nc
+setenv CSMDATA   /raid11/chishin/SCM/data
+
+## Default namelist settings:
+## $case is the case identifier for this run. It will be placed in the namelist.
+## $runtype is the run type: startup, continue, or branch.
+## $stop_n is the number of timesteps to integrate (units depends on stop_option value)
+set dyn          = "eul"
+set ocn          = "dom"
+##set pbl          = "hb"
+set phys         = "cam5"
+set case         = TWPICE_UPDF_v8.0
+if ( $dyn != "eul" ) then
+   echo "SCAM is supported using eularian dynamics only" && exit 1
+endif
+set runtype      = startup
+
+## $wrkdir is a working directory where the model will be built and run.
+## $blddir is the directory where model will be compiled.
+## $rundir is the directory where the model will be run.
+## $cfgdir is the directory containing the CAM configuration scripts.
+set wrkdir       = /raid11/pier/SCM/cases
+set blddir       = $wrkdir/$case/bld
+set rundir       = $wrkdir/$case
+set cfgdir       = $camroot/models/atm/cam/bld
+set res          = "64x128"
+
+## Ensure that run and build directories exist
+mkdir -p $rundir                || echo "cannot create $rundir" && exit 1
+mkdir -p $blddir                || echo "cannot create $blddir" && exit 1
+
+## build exec
+if ( ! -x $blddir/cam )then
+    cd $blddir                  || echo "cd $blddir failed" && exit 1
+    $cfgdir/configure -res $res -phys $phys -ocn $ocn -dyn $dyn -debug  -scam -v -nospmd -nosmp -fc $USER_FC -nc_inc $INC_NETCDF -nc_lib $LIB_NETCDF -ldflags "-L${LIB_NETCDF} -lnetcdf -lnetcdff" || echo "configure failed" && exit 1
+#   $cfgdir/configure -test -res $res -ocn $ocn -dyn $dyn -debug -scam -v -nospmd -nosmp -fc $USER_FC -nc_inc $INC_NETCDF -nc_lib $LIB_NETCDF -ldflags "-L${LIB_NETCDF} -lnetcdf -lnetcdff" || echo "configure failed" && exit 1
+    echo "building CAM in $blddir ..."
+    rm -f Depends
+    make -j8 >&! MAKE.out      || echo "CAM build failed: see $blddir/MAKE.out" && exit 1
+endif
+
+## Create the namelist for scam.  You must specify scamlat,scamlon,iopfile.
+## The starting date/time should correspond to the start of the IOP file
+cd $blddir                      || echo "cd $blddir failed" && exit 1
+$cfgdir/build-namelist  -namelist "&camexp \
+scmlat=-12.425 \
+scmlon=130.891  \
+dtime=1200 \
+irad_always=1  \
+iradlw=1  \
+iradsw=1  \
+macrop_scheme='park' \
+start_ymd=20060117 \
+start_tod=10800 \
+stop_n=1872 \
+stop_option='nsteps' \
+fincl1='MACPDT','MACPDQ','MACPDLIQ','MACPDICE','MPDT','MPDQ','MPDLIQ','MPDICE','ZMDT','ZMDQ','ZMDICE','ZMDLIQ','CMFDT','CMFDQ','CMFDLIQ','CMFDICE','CME','RELHUM','RHW','RHI','RHCFMIP','AST','LIQCLDF','ICECLDF','CONCLD','DPDLFLIQ','DPDLFICE','SHDLFLIQ','SHDLFICE','CLDLIQSTR','CLDICESTR','CLDLIQCON','CLDICECON','OMEGA','ICWMR','ICIMR','BERGSO','BERGO','QQw','QQi','RH_macro','saturation','qtic','qvic','qcic','qiic','dyl','dyi','dqv','qvin_cond','qcin_cond','qiin_cond','ncin_cond','niin_cond','alst_cond','aist_cond','rw_cond','ri_cond','w_cond','rhmin','T_cond','Sinit','omega_macro'\
+iopfile='/raid11/chishin/SCM/TWP06_4scam.nc' \
+mfilt=2000 \
+nhtfrq=-3/" -ignore_ic_date || echo "build-namelist failed" && exit 1
+
+## Run CAM
+cd $rundir                      || echo "cd $rundir failed" && exit 1
+mv $blddir/*in .
+echo "running SCAM in $rundir"
+date > start_time
+$blddir/cam                 || echo "CAM run failed" && exit 1
+date > end_time
+
+exit 0
