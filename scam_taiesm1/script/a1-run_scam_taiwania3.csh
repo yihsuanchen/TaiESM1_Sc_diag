@@ -10,15 +10,6 @@
 #SBATCH --mail-user=yihsuanc@gate.sinica.edu.tw
 #SBATCH --mail-type=FAIL
 
-#--- CJ's SCAM_CAM6 case.st_archive  ---
-##SBATCH0  --job-name=st_archive.SCAM_t1
-##SBATCH0  --nodes=1
-##SBATCH0  --ntasks-per-node=1
-##SBATCH0  --output=st_archive.SCAM_t1   
-##SBATCH0  --exclusive                        
-##SBATCH0  -o /home/cjshiu1972/runs/cesm/stdout/cesm.stdout.%J  
-##SBATCH0  -e /home/cjshiu1972/runs/cesm/stdout/cesm.stderr.%J  
-
 #===================================
 #  Description:
 #    Running single-column version of TaiESM1 on Taiwania 3
@@ -40,8 +31,16 @@ set echo
 # -------------------------------------------------------------------------
 source /opt/ohpc/admin/lmod/8.1.18/init/csh
 setenv MODULEPATH /home/yhtseng00/modules:/opt/ohpc/Taiwania3/modulefiles:/opt/ohpc/Taiwania3/pkg/lmod/comp/intel/2020:/opt/ohpc/pub/modulefiles
+
 module purge
-module load cmake/3.15.4 compiler/intel/2020u4 IntelMPI/2020 netcdf-4.8.0-NC4-intel2020-impi pnetcdf-1.8.1-intel2020-impi
+module load compiler/intel/2020u4 netcdf-4.8.0-intel2020
+
+## ===================================
+## yhc 2023-11-21: SCM was compiled successfully with these modules, but fail to execute "nf90_open". The error message was "Attempting to use an MPI routine before initializing MPICH".
+## module purge
+## module load cmake/3.15.4 compiler/intel/2020u4 IntelMPI/2020 netcdf-4.8.0-NC4-intel2020-impi pnetcdf-1.8.1-intel2020-impi
+## $CAM_ROOT/models/atm/cam/bld/configure -s -chem $aero_mode -dyn eul -res 64x128 -nospmd -nosmp -scam -ocn dom -comp_intf mct -phys cam5 -debug -fc ifort -v
+## ===================================
 
 # -------------------------------------------------------------------------
 #  set environment variables on Taiwania 3
@@ -49,12 +48,8 @@ module load cmake/3.15.4 compiler/intel/2020u4 IntelMPI/2020 netcdf-4.8.0-NC4-in
 
 set CAM_ROOT  = /home/j07hsu00/taiesm/ver170803
 set CSMDATA = /home/j07hsu00/taiesm/inputdata
-
-set NCHOME = /home/yhtseng00/netcdf-4.8.0-NC4-intel2020-impi/
-setenv INC_NETCDF ${NCHOME}/include
-setenv LIB_NETCDF ${NCHOME}/lib
-
-set USER_FC = "ifort"
+setenv INC_NETCDF ${NETCDF}/include
+setenv LIB_NETCDF ${NETCDF}/lib
 
 # -------------------------------------------------------------------------
 # set vars for the SCAM run
@@ -64,7 +59,7 @@ set USER_FC = "ifort"
 set temp=`date +%m%d%H%M%S`
 
 set iopname = 'arm95'
-set model = "qq01-scam_test01"
+set model = "qq02-scam_test02"
 
 set CASE = ${model}.${iopname}.${temp}
 set WRKDIR = /work/yihsuan123/${model}/
@@ -100,11 +95,9 @@ endif
 # configure
 # --------------------------
 cd $BLDDIR || exit 1
-#$CAM_ROOT/models/atm/cam/bld/configure -s -chem $aero_mode -dyn eul -res 64x128 -nospmd -nosmp -scam -ocn dom -comp_intf mct -phys cam5 -debug -fc $USER_FC -ldflags -static-intel
 
-$CAM_ROOT/models/atm/cam/bld/configure -s -chem $aero_mode -dyn eul -res 64x128 -nospmd -nosmp -scam -ocn dom -comp_intf mct -phys cam5 -debug -fc $USER_FC
-
-#$CAM_ROOT/models/atm/cam/bld/configure -s -chem $aero_mode -dyn eul -res 64x128 -scam -ocn dom -comp_intf mct -phys cam5 -debug -fc $USER_FC   ### turn off -nospmd -nosmp
+$CAM_ROOT/models/atm/cam/bld/configure -s -chem $aero_mode -dyn eul -res 64x128 -nospmd -nosmp -scam -ocn dom -comp_intf mct -phys cam5 -debug -fc ifort -cc icc -fc_type intel \
+  || echo "ERROR: Configure failed." && exit 1
 
 # --------------------------
 # compile
