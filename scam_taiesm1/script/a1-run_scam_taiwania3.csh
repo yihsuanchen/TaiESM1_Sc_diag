@@ -46,7 +46,8 @@ module load compiler/intel/2020u4 netcdf-4.8.0-intel2020
 #  set environment variables on Taiwania 3
 # -------------------------------------------------------------------------
 
-set CAM_ROOT  = /home/j07hsu00/taiesm/ver170803
+#set CAM_ROOT  = /home/j07hsu00/taiesm/ver170803
+set CAM_ROOT  = /work/yihsuan123/taiesm_ver170803  # test TaiESM1 codes
 set CSMDATA = /home/j07hsu00/taiesm/inputdata
 setenv INC_NETCDF ${NETCDF}/include
 setenv LIB_NETCDF ${NETCDF}/lib
@@ -58,7 +59,8 @@ setenv LIB_NETCDF ${NETCDF}/lib
 # temporary variable
 set temp=`date +%m%d%H%M%S`
 
-set iopname = 'arm95'
+#set iopname = 'arm95'
+set iopname = 'twp06'
 set model = "qq02-scam_test02"
 
 set CASE = ${model}.${iopname}.${temp}
@@ -112,13 +114,28 @@ gmake -j >&! MAKE.out || echo "ERROR: Compile failed. Check out MAKE.out [$BLDDI
 # Build the namelist with extra fields needed for scam diagnostics
 # --------------------------
 
+if ($iopname == 'twp06') then
+
 cat <<EOF >! tmp_namelistfile
 &camexp 
     history_budget       = .true.,
     nhtfrq               = -3, 
     print_energy_errors=.true., 
 /
+&cam_inparm
+    iopfile = '/work/opt/ohpc/pkg/rcec/model/taiesm/inputdata/atm/cam/scam/iop/TWP06_4scam.nc'
+    ncdata = "/home/j07hsu00/taiesm/inputdata/atm/cam/inic/gaus/cami_0000-01-01_64x128_L30_c090102.nc"  
+/
+&seq_timemgr_inparm
+    stop_n               = 1872,
+    stop_option          = 'nsteps'
+/
 EOF
+
+else
+  echo "ERROR: iopname [$iopname] namelist is not supported in this script" && exit 1
+
+endif
 
 $CAM_ROOT/models/atm/cam/bld/build-namelist -s -infile tmp_namelistfile -use_case scam_${iopname} -csmdata $CSMDATA \
     || echo "build-namelist failed" && exit 1
