@@ -61,9 +61,10 @@ set temp=`date +%m%d%H%M%S`
 
 #set iopname = 'arm95'
 set iopname = 'twp06'
-set model = "qq02-scam_test02"
+set model = "qq03-scam_test"
 
 set CASE = ${model}.${iopname}.${temp}
+set SCAM_MODS = /home/yihsuan123/research/TaiESM1_Sc_diag/scam_taiesm1/script/scam_mods
 set WRKDIR = /work/yihsuan123/${model}/
 set BLDDIR = $WRKDIR/$CASE/bld
 set RUNDIR = $WRKDIR/$CASE/run
@@ -98,7 +99,10 @@ endif
 # --------------------------
 cd $BLDDIR || exit 1
 
-$CAM_ROOT/models/atm/cam/bld/configure -s -chem $aero_mode -dyn eul -res 64x128 -nospmd -nosmp -scam -ocn dom -comp_intf mct -phys cam5 -debug -fc ifort -cc icc -fc_type intel \
+#$CAM_ROOT/models/atm/cam/bld/configure -s -chem $aero_mode -dyn eul -res 64x128 -nospmd -nosmp -scam -ocn dom -comp_intf mct -phys cam5 -debug -fc ifort -cc icc -fc_type intel \
+#  || echo "ERROR: Configure failed." && exit 1
+
+$CAM_ROOT/models/atm/cam/bld/configure -s -chem $aero_mode -dyn eul -res 64x128 -nospmd -nosmp -scam -ocn dom -comp_intf mct -phys cam5 -debug -fc ifort -cc icc -fc_type intel -usr_src $SCAM_MODS \
   || echo "ERROR: Configure failed." && exit 1
 
 # --------------------------
