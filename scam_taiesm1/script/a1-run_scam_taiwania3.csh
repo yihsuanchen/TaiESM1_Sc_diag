@@ -59,11 +59,15 @@ setenv LIB_NETCDF ${NETCDF}/lib
 # temporary variable
 set temp=`date +%m%d%H%M%S`
 
+#--- set case
 #set iopname = 'arm95'
 set iopname = 'twp06'
 set model = "qq03-scam_test"
+#set phys = "cam5"
+set phys = "taiphy"
+set CASE = ${model}.${iopname}.${phys}.${temp}
 
-set CASE = ${model}.${iopname}.${temp}
+#--- set folders
 set SCAM_MODS = /home/yihsuan123/research/TaiESM1_Sc_diag/scam_taiesm1/script/scam_mods
 set WRKDIR = /work/yihsuan123/${model}/
 set BLDDIR = $WRKDIR/$CASE/bld
@@ -102,8 +106,13 @@ cd $BLDDIR || exit 1
 #$CAM_ROOT/models/atm/cam/bld/configure -s -chem $aero_mode -dyn eul -res 64x128 -nospmd -nosmp -scam -ocn dom -comp_intf mct -phys cam5 -debug -fc ifort -cc icc -fc_type intel \
 #  || echo "ERROR: Configure failed." && exit 1
 
-$CAM_ROOT/models/atm/cam/bld/configure -s -chem $aero_mode -dyn eul -res 64x128 -nospmd -nosmp -scam -ocn dom -comp_intf mct -phys cam5 -debug -fc ifort -cc icc -fc_type intel -usr_src $SCAM_MODS \
-  || echo "ERROR: Configure failed." && exit 1
+if ($phys == 'taiphy') then
+  $CAM_ROOT/models/atm/cam/bld/configure -s -chem $aero_mode -dyn eul -res 64x128 -nospmd -nosmp -scam -ocn dom -comp_intf mct -taiphy -debug -fc ifort -cc icc -fc_type intel -usr_src $SCAM_MODS \
+    || echo "ERROR: Configure failed." && exit 1
+else
+  $CAM_ROOT/models/atm/cam/bld/configure -s -chem $aero_mode -dyn eul -res 64x128 -nospmd -nosmp -scam -ocn dom -comp_intf mct -phys $phys -debug -fc ifort -cc icc -fc_type intel -usr_src $SCAM_MODS \
+    || echo "ERROR: Configure failed." && exit 1
+endif
 
 # --------------------------
 # compile
