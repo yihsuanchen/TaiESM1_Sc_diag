@@ -1,21 +1,28 @@
 #!/bin/csh -f
 #SBATCH -A MST112228        # Account name/project number
 #SBATCH -J scam_taiesm1     # Job name
-#SBATCH -p ctest             # Partition name
-#SBATCH -n 1               # Number of MPI tasks (i.e. processes)
+#SBATCH -p ctest            # Partition name
+#SBATCH -n 1                # Number of MPI tasks (i.e. processes)
 #SBATCH -c 1                # Number of cores per MPI task
 #SBATCH -N 1                # Maximum number of nodes to be allocated
 #SBATCH -o %j.out           # Path to the standard output file
 #SBATCH -e %j.err           # Path to the standard error ouput file
-#SBATCH --mail-user=yihsuanc@gate.sinica.edu.tw
+#SBATCH --mail-user=yihsuanc@gate.sinica.edu.tw  # send an email if SCM fails to run
 #SBATCH --mail-type=FAIL
 
 #===================================
 #  Description:
-#    Running single-column version of TaiESM1 on Taiwania 3
+#    Running single-column model (SCM) version of TaiESM1 on Taiwania 3
 #
 #  Author:
 #    Yi-Hsuan Chen (yihsuanc@gate.sinica.edu.tw)
+#
+#  Usage:
+#    1. Make sure SBATCH setting are correct.
+#    2. Modify the variables in "setup for the SCAM run" section, such as the IOP case, model physics, etc.
+#    3. Run the script 
+#       > sbatch THIS_SCRIPT
+#    4. Check the results
 #
 #  Date:
 #    November 2023
@@ -26,11 +33,11 @@
 set echo
 
 # -------------------------------------------------------------------------
-# set up modules on Taiwania 3
+# set up modules on Taiwania 3 to run the SCM.
 # Note that these modules are not the same as running TaiESM1, as the SCM would run into some errors using MPI.
 #
 #
-# yhc 2023-11-21: SCM was compiled successfully with these modules, but fail to execute "nf90_open". The error message was "Attempting to use an MPI routine before initializing MPICH".
+# yhc 2023-11-21: SCM was compiled successfully with these below modules, but fail to execute "nf90_open". The error message was "Attempting to use an MPI routine before initializing MPICH".
 # module purge
 # module load cmake/3.15.4 compiler/intel/2020u4 IntelMPI/2020 netcdf-4.8.0-NC4-intel2020-impi pnetcdf-1.8.1-intel2020-impi
 # $CAM_ROOT/models/atm/cam/bld/configure -s -chem $aero_mode -dyn eul -res 64x128 -nospmd -nosmp -scam -ocn dom -comp_intf mct -phys cam5 -debug -fc ifort -v
@@ -59,7 +66,7 @@ setenv LIB_NETCDF ${NETCDF}/lib
 set temp=`date +%m%d%H%M%S`
 
 #--- set case
-set model = "qq03-scam_test"
+set exp_name = "qq03-scam_test"
 
 #--- available iopname: arm95 arm97 gateIII mpace sparticus togaII twp06, according to $CAM_ROOT/models/atm/cam/bld/build-namelist.
 #                       the build-namelist -use_case scam_${iopname} will fail if not these cases.
@@ -68,15 +75,15 @@ set model = "qq03-scam_test"
 set iopname = 'arm95'
 #set iopname = 'twp06'
 
-set phys = "cam5"
-#set phys = "taiphy"
+#set phys = "cam5"
+set phys = "taiphy"
 
-set CASE = ${model}.${iopname}.${phys}.${temp}
+set CASE = ${exp_name}.${iopname}.${phys}.${temp}
 
 #--- set folders
 set SCAM_MODS = /home/yihsuan123/research/TaiESM1_Sc_diag/scam_taiesm1/script/scam_mods   # put the modifed files in this folder
-                                                                                          # as of 2023/11/28, a modified cam_history.F90 is in the folder. Check out "yhc" to see the modifications.
-set WRKDIR = /work/yihsuan123/${model}/
+                                                                                          # as of 2023/11/28, a modified cam_history.F90 is in the folder. Search "yhc" to see the modifications.
+set WRKDIR = /work/yihsuan123/${exp_name}/
 set BLDDIR = $WRKDIR/$CASE/bld
 set RUNDIR = $WRKDIR/$CASE/run
 mkdir -p $BLDDIR || exit 1
