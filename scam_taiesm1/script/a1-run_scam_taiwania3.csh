@@ -60,11 +60,18 @@ setenv LIB_NETCDF ${NETCDF}/lib
 set temp=`date +%m%d%H%M%S`
 
 #--- set case
-#set iopname = 'arm95'
-set iopname = 'twp06'
 set model = "qq03-scam_test"
-#set phys = "cam5"
-set phys = "taiphy"
+
+#--- available iopname: scam_arm95 scam_arm97 scam_gateIII scam_mpace scam_sparticus scam_togaII scam_twp06
+#                       according to $CAM_ROOT/models/atm/cam/bld/build-namelist (the build-namelist -use_case will fail if no these cases)
+#                       Seem to set the required parameters in namelist file if not these cases
+#                       These paramters should be able to found in CESM2 SCAM
+set iopname = 'arm95'
+#set iopname = 'twp06'
+
+set phys = "cam5"
+#set phys = "taiphy"
+
 set CASE = ${model}.${iopname}.${phys}.${temp}
 
 #--- set folders
@@ -146,7 +153,15 @@ cat <<EOF >! tmp_namelistfile
 EOF
 
 else
-  echo "ERROR: iopname [$iopname] namelist is not supported in this script" && exit 1
+
+cat <<EOF >! tmp_namelistfile
+&camexp 
+    history_budget       = .true.,
+    nhtfrq               = -3, 
+    print_energy_errors=.true., 
+/
+EOF
+  #echo "ERROR: iopname [$iopname] namelist is not supported in this script" && exit 1
 
 endif
 
