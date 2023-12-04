@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!-- "IOP: DYCOMS 2006 (26 April 2001 - 09 June 2001)" -->
+
+<namelist_defaults>
+
+<ncdata             hgrid="64x128"    nlev="30"   scam="1"  >atm/cam/inic/gaus/cami_0000-01-01_64x128_L30_c090102.nc</ncdata>
+<iopfile dyn="eul"                                scam="1"  >atm/cam/scam/iop/DYCOMSrf01_4day_4scam.nc</iopfile>
+<scmlat                                           scam="1"  >   31.5    </scmlat>
+<scmlon                                           scam="1"  >   238.5    </scmlon>
+<start_ymd                                        scam="1"  >   19990711  </start_ymd>
+<start_tod                                        scam="1"  >   0     </start_tod>
+<stop_n                                           scam="1"  >   144      </stop_n>
+<mfilt                                            scam="1"  >   2088      </mfilt>
+<nhtfrq                                           scam="1"  >   1         </nhtfrq>
+<stop_option                                      scam="1"  >   nsteps    </stop_option>
+
+<!-- sim_year used for CLM datasets -->
+<sim_year>2000</sim_year>
+
+</namelist_defaults>
