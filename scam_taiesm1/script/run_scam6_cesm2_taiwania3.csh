@@ -46,23 +46,25 @@ set newcase_params = "--machine nchc3 --compiler intel --mpilib openmpi --compse
 set USER = yihsuan123
 
 # temporary variable
-set temp=`date +%m%d%H%M%S`
+set temp=`date +%m%d_%H%M%S`
 
 #--- set case
-set exp_name = "ee01-scam6_test".${temp}    # expriment name, e.g. a modified version of code
+#set exp_name = "ee01-scam6_test".${temp}    # expriment name, e.g. a modified version of code
+set exp_name = "ee02-scam6_test"
 
 set CASE = /work/${USER}/${exp_name}        # CASE folder where the SCAM will be built and run
 
-#set do_newcase = false  # true: crease a new case. false: using the existing CASE 
-set do_newcase = true
+set do_newcase = false  # true: crease a new case. false: using the existing CASE 
+#set do_newcase = true
 
 #--- supported iopname: /work/j07hsu00/cesm2_work/code/cesm23/components/cam/cime_config/usermods_dirs/
 #       scam_arm95       scam_atex        scam_cgilsS11    scam_cgilsS6     scam_dycomsRF02  scam_mandatory   scam_rico        scam_sparticus   scam_twp06       
 #       scam_arm97       scam_bomex       scam_cgilsS12    scam_dycomsRF01  scam_gateIII     scam_mpace       scam_SAS         scam_togaII 
-set iopname = "scam_twp06"
+set iopnames = ("scam_twp06" "scam_arm95")
 
 #--- iop experiment name. Note that all SCAM runs will be in $CASE, so the SCAM doesn't need to be rebuilt everytime. 
-set CASE_EXP = $CASE/test01_${iopname}
+#    The folder name of each SCAM iop simulation will be ${CASE_EXP_HEAD}${iopname}
+set CASE_EXP_HEAD = "${CASE}/test01_"
 
 # ----------------------
 # link inputdata to your home directory
@@ -115,23 +117,32 @@ endif  ## end if of do_newcase
 #   ./case_submit
 # ----------------------
 
-#--- create iop case
-cd $CIME_SCRIPT || exit 1
-./create_clone --case $CASE_EXP --clone $CASE --user-mods-dir ../../components/cam/cime_config/usermods_dirs/${iopname} --keepexe || exit 1
 
-#--- run SCAM
-cd $CASE_EXP || exit 1
-./xmlchange --force JOB_QUEUE=ctest
-./case.submit  || exit 1
+foreach iopname ($iopnames)
+
+  #--- set iop name
+  set CASE_EXP = ${CASE_EXP_HEAD}${iopname}
+
+  #--- create iop case
+  cd $CIME_SCRIPT || exit 1
+  ./create_clone --case $CASE_EXP --clone $CASE --user-mods-dir ../../components/cam/cime_config/usermods_dirs/${iopname} --keepexe || exit 1
+
+  #--- run SCAM
+  cd $CASE_EXP || exit 1
+  ./xmlchange --force JOB_QUEUE=ctest
+  ./case.submit  || exit 1
+
+end   # end loop of iopnames
 
 # ----------------------
 # back up this script
 # ----------------------
 
 #--- back up this script in $BLDDIR
-set this_script = "$0"
-set script_name = "zz-run_scam6.csh"
-cp $this_script $CASE_EXP || exit 1
+#set this_script = "$0"
+set this_script = "`pwd`/$0"
+set script_name = "zz-run_scam6.csh.${temp}"
+cp $this_script $CASE/$script_name || exit 1
 
 exit 0
 
