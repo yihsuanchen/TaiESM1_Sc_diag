@@ -2,7 +2,7 @@
 
 #===================================
 #  Description:
-#    Running single-column model (SCAM6) CESM2.3 on Taiwania 3
+#    Running The Single Column Atmosphere Model Version 6 (SCAM6) on Taiwania 3. The code base in CESM2.3.
 #
 #  Author:
 #    Yi-Hsuan Chen (yihsuanc@gate.sinica.edu.tw)
@@ -12,8 +12,9 @@
 #    2. Run the script 
 #         > ./THIS_SCRIPT
 #    3. Check the results
-#         If the SCAM is run successfully, the output will be at /work/$USER/cesm2_work/archive/$CASE_EXP
-#                                          the namelist will be at /work/$USER/cesm2_work/cases/$CASE_EXP
+#         If the SCAM is run successfully, 
+#            the output will be at /work/$USER/cesm2_work/archive/$CASE_EXP
+#            the namelist will be at /work/$USER/cesm2_work/cases/$CASE_EXP
 #
 #         If the SCAM failed, 
 #            the stdout and stderr files will be at /home/$USER/cesm/stdout/cesm.stdout[stderr]
@@ -57,13 +58,12 @@ set USER = yihsuan123
 set temp=`date +%m%d_%H%M%S`
 
 #--- set case
-#set exp_name = "ee01-scam6_test".${temp}    # expriment name, e.g. a modified version of code
-set exp_name = "ee03-scam6_test111"
+set exp_name = "scam6_test"
 
 set CASE = /work/${USER}/${exp_name}        # CASE folder where the SCAM will be built and run
 
-#set do_newcase = false                     # true: crease a new case. false: using the existing CASE 
-set do_newcase = true
+set do_newcase = true                       # true: crease a new case. false: using the existing CASE 
+#set do_newcase = false
 
 #--- supported iopname: /work/j07hsu00/cesm2_work/code/cesm23/components/cam/cime_config/usermods_dirs/
 #       scam_arm95       scam_atex        scam_cgilsS11    scam_cgilsS6     scam_dycomsRF02  scam_mandatory   scam_rico        scam_sparticus   scam_twp06       
@@ -73,7 +73,8 @@ set iopnames = ("scam_twp06" "scam_arm95")
 
 #--- SCAM experiments. Note that if do_newcase = false, all SCAM runs will be in same $CASE, so the SCAM doesn't need to be rebuilt everytime. 
 #    ${CASE_EXP_HEAD}${iopname} will be the folder name of SCAM experiment
-set CASE_EXP_HEAD = "${CASE}/${exp_name}.${temp}_"
+#set CASE_EXP_HEAD = "${CASE}/${exp_name}.${temp}_"
+set CASE_EXP_HEAD = "${CASE}/${exp_name}_"
 
 # ----------------------
 # link inputdata to your home directory
