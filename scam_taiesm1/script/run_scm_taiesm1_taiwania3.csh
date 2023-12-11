@@ -37,7 +37,6 @@ set echo
 # set up modules on Taiwania 3 to run the SCM.
 # Note that these modules are not the same as running TaiESM1, as the SCM would run into some errors using MPI.
 #
-#
 # yhc 2023-11-21: SCM was compiled successfully with these below modules, but fail to execute "nf90_open". The error message was "Attempting to use an MPI routine before initializing MPICH".
 # module purge
 # module load cmake/3.15.4 compiler/intel/2020u4 IntelMPI/2020 netcdf-4.8.0-NC4-intel2020-impi pnetcdf-1.8.1-intel2020-impi
