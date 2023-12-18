@@ -37,6 +37,13 @@ set this_script = "`pwd`/$0"
 #  set environment variables on Taiwania 3
 # -------------------------------------------------------------------------
 
+#--- load modules
+source /opt/ohpc/admin/lmod/8.1.18/init/csh
+setenv MODULEPATH /home/yhtseng00/modules:/opt/ohpc/Taiwania3/modulefiles:/opt/ohpc/Taiwania3/pkg/lmod/comp/intel/2020:/opt/ohpc/pub/modulefiles
+
+module purge
+module load rcec/tools-intel19
+
 #--- set the path of cime/script
 #      yhc note 2023-12-08: Hsin-Chien Liang made some changes in cesm23/cime_config.
 #      In SCAM, it forced using mpi-serial in cime_config/??, but create_case uses openmpi. 
@@ -68,13 +75,14 @@ set do_newcase = true                       # true: crease a new case. false: us
 #--- supported iopname: /work/j07hsu00/cesm2_work/code/cesm23/components/cam/cime_config/usermods_dirs/
 #       scam_arm95       scam_atex        scam_cgilsS11    scam_cgilsS6     scam_dycomsRF02  scam_mandatory   scam_rico        scam_sparticus   scam_twp06       
 #       scam_arm97       scam_bomex       scam_cgilsS12    scam_dycomsRF01  scam_gateIII     scam_mpace       scam_SAS         scam_togaII 
-set iopnames = ("scam_twp06" "scam_arm95")
-#set iopnames = ("scam_twp06")
+#set iopnames = ("scam_twp06" "scam_arm95")
+set iopnames = ("scam_twp06")
 
 #--- SCAM experiments. Note that if do_newcase = false, all SCAM runs will be in same $CASE, so the SCAM doesn't need to be rebuilt everytime. 
 #    ${CASE_EXP_HEAD}${iopname} will be the folder name of SCAM experiment
 #set CASE_EXP_HEAD = "${CASE}/${exp_name}.${temp}_"
-set CASE_EXP_HEAD = "${CASE}/${exp_name}_"
+#set CASE_EXP_HEAD = "${CASE}/${exp_name}_"
+set CASE_EXP_HEAD = "${CASE}/${exp_name}.${temp}_"
 
 # ----------------------
 # link inputdata to your home directory
