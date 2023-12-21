@@ -1,4 +1,4 @@
-# README - Create the initial data for TaiESM hindcast simulation from ERA5
+# README - Create the initial data for TaiESM hindcast simulation. The initial data is from ERA5.
 
 **Pre-request**
 Download the ERA5 data
@@ -9,10 +9,10 @@ Download the ERA5 data
   - https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-single-levels?tab=overview
 
 **Step-by-step instruction**
-1. Edit and run 01a-icdata_select_time_loop.sh.
-   This script will select each time step in the ERA5 files and write the data into new files.
+1. Edit and run createIC_01a-icdata_select_time_loop.sh.
+   This script will select each time step in the ERA5 files and write the selected data into new files.
 
-2. Edit the run 01b-intrp_ERA5_to_CAM_coords.sh.
+2. Edit createIC_01b-intrp_ERA5_to_CAM_coords.sh, and run it.
 
    This script will create commands running a NCL program with given files from the previous step.
    The NCL program will Interpolate ERA5 surface pressure and T,Q,U,V on CAM hybrid vertical coordinate and lat/lon grids, and save these interpolated fileds into a new file. 
