@@ -27,6 +27,10 @@ begin
 ; general settings
 ;------------------
 
+    ;--- whether to write out the interpolated fields into new files
+    ;do_writeout = False
+    do_writeout = True
+
     ;--- input arguments
     ;datapath = "~/data/data.ERA5/"
     ;filename_prs = datapath+"ERA5_PRS.t_q_u_v.r1440x721.2001_07_01_00Z.nc"
@@ -37,7 +41,6 @@ begin
     print("Input ERA5 PRS file: "+filename_prs)
     print("Input ERA5 SFC file: "+filename_sfc)
     print("Output file        : "+filename_out)
-
 
 ;--------------------------------
 ; Open files and read variables
@@ -80,6 +83,9 @@ begin
     ;printVarSummary(psfc)
     ;printVarSummary(psfc_intrp)
 
+    ;var_tmp = file_sfc->$varname_sp$
+    ;print("float: "+psfc+" , short: "+var_tmp)
+
 ;------------------------------------------------------------
 ; Read ERA5 variables on pressure levels and interpolate it on cami lat/lon grids
 ;------------------------------------------------------------
@@ -92,13 +98,19 @@ begin
     lon_prs = file_prs->longitude
     lat_prs = file_prs->latitude
 
-    do vv=0, nvar-1
-    ;do vv=0,0
+    ;do vv=0, nvar-1
+    do vv=0,0
 
       ;--- read a variable
       varname = varname_prs(vv)
       print("  process ["+varname+"]...")
       var_prs = short2flt(file_prs->$varname$)
+
+      ;print("aa1")
+      ;ii=100
+      ;var_tmp = file_prs->$varname$(0,:,:,ii)
+      ;print("float: "+var_prs(0,:,:,ii)+" , short: "+var_tmp)
+      ;print("aa2")
 
       ;printVarSummary(var_prs)
       ;printVarSummary(psfc_intrp)
@@ -165,6 +177,7 @@ begin
     ;printVarSummary(u_intrp)
     ;printVarSummary(v_intrp)
 
+  if (do_writeout) then
     ; create file_out
     comd = "cp -i "+outfile_ref+" "+filename_out+" && echo create_file_out || exit 1"
     ;print(comd)
@@ -178,5 +191,6 @@ begin
     file_out->US = (/u_intrp/)
     file_out->VS = (/v_intrp/)
     file_out->PS = (/psfc_intrp/)
+  end if  ; end if of do_writeout
 
 end
