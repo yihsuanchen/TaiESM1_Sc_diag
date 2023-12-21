@@ -21,7 +21,7 @@
 # user setting
 ###################
 
-#--- input files
+#--- input files. You can download the data from ERA5 website and rename them.  
 filenames=("ERA5_PRS.t_q_u_v.200107_00Z.r1440x721.nc" "ERA5_SFC.sp.200107_00Z.r1440x721.nc")
 
 #--- output files
