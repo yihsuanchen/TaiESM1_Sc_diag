@@ -98,8 +98,8 @@ begin
     lon_prs = file_prs->longitude
     lat_prs = file_prs->latitude
 
-    ;do vv=0, nvar-1
-    do vv=0,0
+    do vv=0, nvar-1
+    ;do vv=0,0
 
       ;--- read a variable
       varname = varname_prs(vv)
