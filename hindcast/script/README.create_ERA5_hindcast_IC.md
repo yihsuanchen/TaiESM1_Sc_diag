@@ -18,7 +18,13 @@ Download the ERA5 data
    The NCL program will Interpolate ERA5 surface pressure and T,Q,U,V on CAM hybrid vertical coordinate and lat/lon grids, and save these interpolated fileds into a new file. 
    The new files are used for running hindcast simulations.
 
-3. Check the original ERA5 fields with the newly interpolated fields 
+3. Use 'ncview' to check the original ERA5 fields with the newly interpolated fields.
+   > ncview $ERA5_FILE   # note that although ERA5 variables are in short format, ncview somehow convert them into float format
+   > ncview $NEW_FILE
+
+   Select Var, and click 'Range' botton to set the contour intervals.
+   Click 'level' to plot the variables on map. Note that the level is on vertical coordinate (pressure levels or hybrid levels).
+   Although $NEW_FILE is on hybrid level, the values not indicate actually pressure but they are close when surface pressure ~1000hPa.
 
 **Reference program:**
 - /lfs/home/hsieh8835/05-IC/geticdata_loop_goamzn.csh
