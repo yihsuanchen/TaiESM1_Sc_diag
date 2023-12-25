@@ -26,7 +26,7 @@
 ###################
 
 #--- input ERA5 files, e.g. $datapath_in/ERA5_PRS.t_q_u_v.r1440x721.${yyyy}_${mm}_${dd}_${hh}.nc
-datapath_in="/lfs/home/yihsuanc/data/data.TaiESM1_hindcast/data.July2001_ERA5/"
+datapath_in="/lfs/home/yihsuanc/data/data.TaiESM1_hindcast/data.July2001_ERA5.hindcast/"
 file_prs_head=("ERA5_PRS.t_q_u_v.r1440x721.") 
 file_sfc_head=("ERA5_SFC.sp.r1440x721.")
 fileend=(".nc")
@@ -43,8 +43,9 @@ dd_end=31
 #    and save into a new file, "${datapath_out}/${outfile_head}${yyyy}_${mm}_${dd}_${hh}.nc
 #    The new file can use as CAM initial data for running hindcast simulations.
 datapath_out="./"
-outfile_ref="/lfs/home/yihsuanc/data/data.TaiESM1_hindcast/data.cami_template/cami-mam3_0000-01-01_0.9x1.25_L30_c100618.nc"
-outfile_head=("cami-mam3_0000-01-01_0.9x1.25_L30.ERA5_ic.")
+#outfile_ref="/lfs/home/yihsuanc/data/data.TaiESM1_hindcast/data.cami_template/cami-mam3_0000-01-01_0.9x1.25_L30_c100618.nc"  # cam5 
+outfile_ref="/lfs/home/yihsuanc/data/data.TaiESM1_hindcast/data.cami_template/cami-snap_0000-01-01_0.9x1.25_L30_c100618.nc"   # TaiESM
+outfile_head=("cami-snap_0000-01-01_0.9x1.25_L30.ERA5_ic.")
 
 #--- NCL file 
 nclfiles="02a-intrp_ERA5_to_CAM_coords.ncl"
