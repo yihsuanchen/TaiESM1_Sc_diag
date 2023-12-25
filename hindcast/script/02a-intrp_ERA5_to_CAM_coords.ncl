@@ -40,6 +40,7 @@ begin
 
     print("Input ERA5 PRS file: "+filename_prs)
     print("Input ERA5 SFC file: "+filename_sfc)
+    print("Output ref file    : "+outfile_ref)
     print("Output file        : "+filename_out)
 
 ;--------------------------------
