@@ -21,7 +21,7 @@
 # user setting
 ###################
 
-set -x  # echo all commands
+#set -x  # echo all commands
 
 # temp variable
 temp=`date +%m%d_%H%M`
@@ -38,7 +38,7 @@ STOP_N=5
 
 #--- simulation case
 WRKDIR="/work/yihsuan123/taiesm1_test_hindcast/"
-CASENAME="taiesm1.${compset}.${res}.${temp}"
+CASENAME="qq01-taiesm1.${compset}.${res}.${temp}"
 CASE="$WRKDIR/$CASENAME"
 
 #--- slurm setup
@@ -81,8 +81,8 @@ cd $CASE || exit 1
 ./xmlchange -file env_mach_pes.xml -id NTASKS_ROF -val $num_cpu || exit 300
 ./xmlchange -file env_mach_pes.xml -id NTASKS_GLC -val $num_cpu || exit 300
 
-./xmlchange -id STOP_OPTION -val ${STOP_OPTION}
-./xmlchange -id STOP_N -val ${STOP_N}
+./xmlchange -file env_run.xml -id STOP_OPTION -val ${STOP_OPTION} || exit 300
+./xmlchange -file env_run.xml -id STOP_N -val ${STOP_N}           || exit 300
 
 cat > ./user_nl_cam << EOF
 &cam_inparm
