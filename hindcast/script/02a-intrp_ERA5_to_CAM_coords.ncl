@@ -43,6 +43,7 @@ begin
     print("Output ref file    : "+outfile_ref)
     print("Output file        : "+filename_out)
 
+
 ;--------------------------------
 ; Open files and read variables
 ;--------------------------------
@@ -80,6 +81,9 @@ begin
 
     ;--- interpolat ERA5 surface pressure on cami lat/lon grids
     psfc_intrp  = area_hi2lores (pslon,pslat(::-1), psfc(:,::-1,:) , True, 1,  lon_cami, lat_cami, opt  )  ; (ntim,49,120)
+
+    psfc_intrp_pa = psfc_intrp * 100.
+    psfc_intrp_pa@units = "Pa"
 
     ;printVarSummary(psfc)
     ;printVarSummary(psfc_intrp)
@@ -187,11 +191,21 @@ begin
     print("  write out variables...")
 
     file_out = addfile(filename_out, "w")
+
+    ;--- write variables
     file_out->T  = (/t_intrp/)
     file_out->Q  = (/q_intrp/)
     file_out->US = (/u_intrp/)
     file_out->VS = (/v_intrp/)
-    file_out->PS = (/psfc_intrp/)
+    file_out->PS = (/psfc_intrp_pa/)
+
+    ;--- add file attributes
+    current_time = systemfunc("date +%Y%m%d_%H:%M:%S")
+    file_out@file_modification = "replace T,Q,US,VS,PS with ERA5 data at "+current_time
+    file_out@Input_ERA5_PRS_file = filename_prs
+    file_out@Input_ERA5_SFC_file = filename_sfc
+    file_out@Output_ref_file = outfile_ref
+
   end if  ; end if of do_writeout
 
 end
