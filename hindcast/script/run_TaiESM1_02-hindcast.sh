@@ -8,7 +8,7 @@
 #  Usage:
 #    First, make sure a TaiESM case is already built.
 #
-#    Edit the "user setting" section, and then execute this script
+#    Edit the "user setting" section & user_nl_cam, and then execute this script
 #    > ./THIS_SCRIPT
 #
 #    The case folder will be at $CASE
@@ -25,19 +25,22 @@
 
 #--- existing TaiESM1 case
 WRKDIR="/work/yihsuan123/taiesm1_test_hindcast/"
-CASENAME="taiesm1.F_2000_TAI.f09_f09.1222_1522"
+CASENAME="xx01-taiesm1.F_2000_TAI.f09_f09.1226_1050"
 CASE="$WRKDIR/$CASENAME"
 
-#--- start date, iStart
-#    end   date, iEnd
+#--- initial condition data for each hindcase run
 icdata_path="/work/yihsuan123/data/data.TaiESM1_hindcast/data.July2001_ERA5.hindcast/"
-icdata_filehead="cami-mam3_0000-01-01_0.9x1.25_L30.ERA5_ic."
+icdata_filehead="cami-snap_0000-01-01_0.9x1.25_L30.ERA5_ic."
 icdata_fileend=".nc"
-start_date=20010701
-end_date=20010702
+start_date=20010707
+end_date=20010709
 hh="00Z"
 
-#---
+#--- stop options
+STOP_OPTION="ndays"
+STOP_N=2
+
+#--- pause for 1 second in case you want to stop the script (set do_pause=F to skip)
 do_pause="T"
 #do_pause="F"
 
@@ -74,24 +77,38 @@ while [ "$current_date" -le "$end_date" ]; do
 
   ### replace the date ## 
   echo "Simulation date = ${idate}"
-  ./xmlchange -file env_run.xml -id RUN_REFDATE -val $idate 
-  ./xmlchange -file env_run.xml -id RUN_STARTDATE -val $idate 
+  ./xmlchange -file env_run.xml -id RUN_REFDATE   -val $idate         || exit 300
+  ./xmlchange -file env_run.xml -id RUN_STARTDATE -val $idate         || exit 300
+  ./xmlchange -file env_run.xml -id STOP_OPTION   -val ${STOP_OPTION} || exit 300
+  ./xmlchange -file env_run.xml -id STOP_N        -val ${STOP_N}      || exit 300
+
   #sed -i "s|ncdata =.*|ncdata = $file1|g" user_nl_cam  || exit 1
 
+#--- cam namelist
   cat > ./user_nl_cam << EOF
 &cam_inparm
+nhtfrq = 24
+mfilt  = 12
 ncdata = '${file1}'
 /
 EOF
 
+  #--- do_pause
   if [ $do_pause == "T" ]; then
     echo "pause for 1 second in case you want to stop the script (set do_pause=F to skip)" 
     sleep 1   # pause for 
   fi
-
+  
+  #--- submit the job
   ./${CASENAME}.submit || exit 1
   current_date=$(date -d "$current_date + 1 day" +%Y%m%d)
   echo ""
-done
+
+  #--- yhc note: It seems like if one job is still in queue but another job is submitted. The previous job will use the setup of the following job.
+  #              To avoid this situation, make this script sleep for 2 mins.
+  echo "sleep 2 mins in case the previos job uses the setup of the following job..."  
+  sleep 120
+
+done  # end loop of current_date
 
 
