@@ -32,8 +32,8 @@ CASE="$WRKDIR/$CASENAME"
 icdata_path="/work/yihsuan123/data/data.TaiESM1_hindcast/data.July2001_ERA5.hindcast/"
 icdata_filehead="cami-snap_0000-01-01_0.9x1.25_L30.ERA5_ic."
 icdata_fileend=".nc"
-start_date=20010707
-end_date=20010709
+start_date=20010701
+end_date=20010703
 hh="00Z"
 
 #--- stop options
@@ -53,7 +53,7 @@ do_pause="T"
 cd $CASE || exit 1
 
 #--- check start_date and end_date
-if [ "$start_date" -ge "$end_date" ]; then
+if [ "$start_date" -gt "$end_date" ]; then
   echo "ERROR: start_date [$start_date] is greater than end_date [$end_date]. Please edit this script to fix it."
   exit 1
 fi
@@ -85,11 +85,16 @@ while [ "$current_date" -le "$end_date" ]; do
   #sed -i "s|ncdata =.*|ncdata = $file1|g" user_nl_cam  || exit 1
 
 #--- cam namelist
+#    ref: CAM namelist variables: https://www2.cesm.ucar.edu/models/cesm1.2/cesm/doc/modelnl/nl_cam.html
+#         CESM Tutorial: https://ncar.github.io/CESM-Tutorial/README.html#
   cat > ./user_nl_cam << EOF
 &cam_inparm
-nhtfrq = 24
-mfilt  = 12
+nhtfrq = -1
+mfilt  = 24
 ncdata = '${file1}'
+empty_htapes = .true. 
+fincl1 = "CLDHGH:A","CLDICE:A","CLDLIQ:A","CLDLOW:A","CLDMED:A","CLDTOT:A","CLOUD:A","FLDS:A","FLNS:A","FLNSC:A","PBLH:A"
+hfilename_spec = "%c.icdate_${current_date}.cam.h%t.%y-%m-%d-%s.nc"
 /
 EOF
 
