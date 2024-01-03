@@ -32,8 +32,8 @@ CASE="$WRKDIR/$CASENAME"
 icdata_path="/work/yihsuan123/data/data.TaiESM1_hindcast/data.July2001_ERA5.hindcast/"
 icdata_filehead="cami-snap_0000-01-01_0.9x1.25_L30.ERA5_ic."
 icdata_fileend=".nc"
-start_date=20010701
-end_date=20010703
+start_date=20010721
+end_date=20010721
 hh="00Z"
 
 #--- stop options
@@ -87,13 +87,14 @@ while [ "$current_date" -le "$end_date" ]; do
 #--- cam namelist
 #    ref: CAM namelist variables: https://www2.cesm.ucar.edu/models/cesm1.2/cesm/doc/modelnl/nl_cam.html
 #         CESM Tutorial: https://ncar.github.io/CESM-Tutorial/README.html#
+#         CESM2 output fields: https://www2.cesm.ucar.edu/models/cesm2/atmosphere/docs/ug6/hist_flds_f2000.html
   cat > ./user_nl_cam << EOF
 &cam_inparm
 nhtfrq = -1
 mfilt  = 24
 ncdata = '${file1}'
 empty_htapes = .true. 
-fincl1 = "CLDHGH:A","CLDICE:A","CLDLIQ:A","CLDLOW:A","CLDMED:A","CLDTOT:A","CLOUD:A","FLDS:A","FLNS:A","FLNSC:A","PBLH:A"
+fincl1 = "CLDHGH:A","CLDICE:A","CLDLIQ:A","CLDLOW:A","CLDMED:A","CLDTOT:A","CLOUD:A","FLDS:A","FLNS:A","FLNSC:A","FLUT:A","FLUTC:A","FSDS:A","FSDSC:A","FSNS:A","FSNSC:A","FSNTOA:A","FSNTOAC:A","FSUTOA:A","LHFLX:A","LWCF:A","OMEGA:A","PBLH:A","PRECC:A","PRECL:A","PS:A","Q:A","QREFHT:A","QRL:A","QRS:A","SHFLX:A","SOLIN:A","SWCF:A","T:A","TREFHT:A","TS:A","U:A","U10:A","V:A","Z3:A",
 hfilename_spec = "%c.icdate_${current_date}.cam.h%t.%y-%m-%d-%s.nc"
 /
 EOF
