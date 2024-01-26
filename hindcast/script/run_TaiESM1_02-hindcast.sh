@@ -32,21 +32,50 @@ CASE="$WRKDIR/$CASENAME"
 icdata_path="/work/yihsuan123/data/data.TaiESM1_hindcast/data.July2001_ERA5.hindcast/"
 icdata_filehead="cami-snap_0000-01-01_0.9x1.25_L30.ERA5_ic."
 icdata_fileend=".nc"
-start_date=20010721
-end_date=20010721
+start_date=20010713
+#end_date=20010720
+end_date=$start_date
 hh="00Z"
 
 #--- stop options
 STOP_OPTION="ndays"
-STOP_N=2
+STOP_N=5
 
 #--- pause for 1 second in case you want to stop the script (set do_pause=F to skip)
 do_pause="T"
 #do_pause="F"
 
+#--- pause if there is any unfinished job. HAVE NOT TESTED YET (2024/01/26)
+#do_stay="T"
+do_stay="F"
+
 ###################
 # program start
 ###################
+
+#--- check whether previous job is still in queue
+if [ $do_stay == "T" ]; then
+  job_in_queue=0
+  counts="0"
+
+  while [ $job_in_queue -ne 1 ] && [ $counts -le 3 ]; do
+    job_in_queue=`squeue -u $USER | grep "PD" >> /dev/null ; echo $?`
+
+    if [ $job_in_queue -eq 0 ]; then  #  previous job is still in queue
+      echo "WARNING: previous job is still in queue. Sleep 2 mins..."
+      #sleep 2
+    fi
+
+    counts=$((counts+1))
+    echo "Counts: [$counts]"
+  done
+fi
+
+#--- back up this script
+date_now=`date +%m%d_%H%M`
+this_script="`pwd`/$0"
+script_backup="$CASE/zz-run_hindcast.${CASENAME}.sh.${date_now}"
+cp $this_script $script_backup && echo "Done. back up this script [$script_backup]" || exit 1
 
 #set -x
 
