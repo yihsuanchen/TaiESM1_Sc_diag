@@ -25,6 +25,7 @@
 
 # temp variable
 temp=`date +%m%d_%H%M`
+yyyymmdd=`date  +%Y_%m_%d`
 
 #--- TaiESM source code folder
 CCSMROOT="/work/yihsuan123/taiesm_ver170803_yhcTEST/"
@@ -38,11 +39,12 @@ STOP_N=5
 
 #--- simulation case
 WRKDIR="/work/yihsuan123/taiesm1_test_hindcast/"
-CASENAME="qq01-taiesm1.${compset}.${res}.${temp}"
+#CASENAME="xx01-taiesm1.${compset}.${res}.${temp}"
+CASENAME="hindcast01_2001July-taiesm1.${compset}.${res}"
 CASE="$WRKDIR/$CASENAME"
 
 #--- slurm setup
-do_submit="T"        # "T": submit the job
+do_submit="F"        # "T": submit the job
 
 account="MST112228"  # account name on Taiwania 3
 queue="ct224"        # name of queue on Taiwania 3. Use "sinfo -s" to view the available queue
