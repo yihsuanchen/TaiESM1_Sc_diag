@@ -25,6 +25,10 @@
 # user setting
 ###################
 
+### -------------------- ###
+### data is on RCEC 300T ###
+### -------------------- ###
+
 #--- input ERA5 files, e.g. $datapath_in/ERA5_PRS.t_q_u_v.r1440x721.${yyyy}_${mm}_${dd}_${hh}.nc
 datapath_in="/lfs/home/yihsuanc/data/data.TaiESM1_hindcast/data.July2001_ERA5.hindcast/"
 file_prs_head=("ERA5_PRS.t_q_u_v.r1440x721.") 
