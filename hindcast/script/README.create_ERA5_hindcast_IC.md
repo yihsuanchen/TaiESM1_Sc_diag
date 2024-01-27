@@ -3,6 +3,9 @@
 **Pre-request**
 Download the ERA5 data
 
+Require variables: u, v, t, q, Ps
+Time: 00Z on each day
+
 - ERA5 hourly data on pressure levels from 1940 to present
   - https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-pressure-levels?tab=overview
 -  ERA5 hourly data on single levels from 1940 to present
@@ -15,7 +18,7 @@ Download the ERA5 data
 2. Edit createIC_01b-intrp_ERA5_to_CAM_coords.sh, and run it.
 
    This script will create commands running a NCL program with given files from the previous step.
-   The NCL program will Interpolate ERA5 surface pressure and T,Q,U,V on CAM hybrid vertical coordinate and lat/lon grids, and save these interpolated fileds into a new file. 
+   The NCL program will interpolate ERA5 surface pressure and T,Q,U,V on CAM hybrid vertical coordinate and lat/lon grids, and save these interpolated fileds into a new file. 
    The new files are used for running hindcast simulations.
 
 3. Use 'ncview' to check the original ERA5 fields with the newly interpolated fields.
