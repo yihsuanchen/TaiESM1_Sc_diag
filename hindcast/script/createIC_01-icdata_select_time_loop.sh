@@ -21,20 +21,21 @@
 # user setting
 ###################
 
-#--- input files. You can download the data from ERA5 website and rename them.  
-filenames=("ERA5_PRS.t_q_u_v.200107_00Z.r1440x721.nc" "ERA5_SFC.sp.200107_00Z.r1440x721.nc")
-
-#--- output files
-#    the file name would be ${newfilehead}"${yyyy}_${mm}_${dd}_${hh}"${newfileend}
-newfilehead=("ERA5_PRS.t_q_u_v.r1440x721." "ERA5_SFC.sp.r1440x721.")
-newfileend=(".nc")
-
 #--- time in the file
 yyyy=2001
 mm=07
 hh="00Z"
 dd_start=1
 dd_end=31
+
+#--- input files contain one-month data. You can download the data from ERA5 website and rename them.  
+filenames=("ERA5_PRS.t_q_u_v.${yyyy}${mm}_${hh}.r1440x721.nc" "ERA5_SFC.sp.${yyyy}${mm}_${hh}.r1440x721.nc")
+
+#--- output files
+#    the file name would be ${newfilehead}"${yyyy}_${mm}_${dd}_${hh}"${newfileend}
+newfilehead=("ERA5_PRS.t_q_u_v.r1440x721." "ERA5_SFC.sp.r1440x721.")
+newfileend=(".nc")
+
 
 ##################
 # program start
