@@ -33,8 +33,8 @@ CASE="$WRKDIR/$CASENAME"
 icdata_path="/work/yihsuan123/data/data.TaiESM1_hindcast/data.July2001_ERA5.hindcast/"
 icdata_filehead="cami-snap_0000-01-01_0.9x1.25_L30.ERA5_ic."
 icdata_fileend=".nc"
-start_date=20010702
-end_date=20010705
+start_date=20010725
+end_date=20010731
 #end_date=$start_date
 hh="00Z"
 
@@ -46,35 +46,26 @@ STOP_N=5
 do_pause="T"
 #do_pause="F"
 
-#--- pause if there is any unfinished job. HAVE NOT TESTED YET (2024/01/26)
-#do_stay="T"
-do_stay="F"
+#--- hold if there is any unfinished job.
+do_hold="T"
+#do_hold="F"
+
+hold_seconds=$((60 * 1))   # seconds   
+#hold_seconds=$((1 * 1))   # seconds   
+
+counts_max=20  # maximum times of counts for hold_seconds
 
 #--- whether back up this script
-#do_backup_script="T"  
-do_backup_script="F"  
+do_backup_script="T"  
+#do_backup_script="F"  
+
+#--- sleep for a few minutes before submitting another job
+do_sleep="F"
+sleep_seconds=$((60 * 2))   # # seconds   
 
 ###################
 # program start
 ###################
-
-#--- check whether previous job is still in queue
-if [ $do_stay == "T" ]; then
-  job_in_queue=0
-  counts="0"
-
-  while [ $job_in_queue -ne 1 ] && [ $counts -le 3 ]; do
-    job_in_queue=`squeue -u $USER | grep "PD" >> /dev/null ; echo $?`
-
-    if [ $job_in_queue -eq 0 ]; then  #  previous job is still in queue
-      echo "WARNING: previous job is still in queue. Sleep 2 mins..."
-      #sleep 2
-    fi
-
-    counts=$((counts+1))
-    echo "Counts: [$counts]"
-  done
-fi
 
 #--- back up this script
 if [ $do_backup_script == "T" ]; then
@@ -83,10 +74,6 @@ if [ $do_backup_script == "T" ]; then
   script_backup="$CASE/zz-run_hindcast.${CASENAME}.sh.${date_now}"
   cp $this_script $script_backup && echo "Done. back up this script [$script_backup]" || exit 1
 fi
-
-#set -x
-
-cd $CASE || exit 1
 
 #--- check start_date and end_date
 if [ "$start_date" -gt "$end_date" ]; then
@@ -99,6 +86,33 @@ current_date="$start_date"
 
 while [ "$current_date" -le "$end_date" ]; do
 
+  cd $CASE || exit 1  ## move to the CASE directory
+
+  echo "Hindcast simulation start date: [$current_date]"
+
+  #--- check whether previous job is still in queue
+  job_in_queue=0
+  counts="0"
+  if [ $do_hold == "T" ]; then
+    while [ $job_in_queue -ne 1 ] && [ $counts -le $counts_max ]; do
+      job_in_queue=`squeue -u $USER | grep "PD" >> /dev/null ; echo $?`
+
+      if [ $job_in_queue -eq 0 ]; then  #  previous job is still in queue
+        echo "WARNING: previous job is still in queue. Hold [$hold_seconds] seconds..."
+        sleep $hold_seconds
+      fi
+
+      counts=$((counts+1))
+      echo "Counts: [$counts]"
+    done
+  fi
+
+  if [ $counts -ge $counts_max ]; then
+    echo "STOP: Previous jobs are in queue. Date [$current_date] has not been submitted."
+    exit 0
+  fi
+
+  #--- set the initial condition file
   yr=`echo $current_date | cut -c 1-4` 
   mo=`echo $current_date | cut -c 5-6` 
   dy=`echo $current_date | cut -c 7-8` 
@@ -129,10 +143,10 @@ while [ "$current_date" -le "$end_date" ]; do
 nhtfrq = -1, -3
 mfilt  = 24, 8
 ncdata = '${file1}'
+hfilename_spec = "%c.icdate_${current_date}.cam.h%t.%y-%m-%d-%s.nc", "%c.icdate_${current_date}.cam.h%t.%y-%m-%d-%s.nc"
 empty_htapes = .true. 
 fincl1 = "CLDHGH:A","CLDLOW:A","CLDMED:A","CLDTOT:A","FLDS:A","FLNS:A","FLNSC:A","FLUT:A","FLUTC:A","FSDS:A","FSDSC:A","FSNS:A","FSNSC:A","FSNTOA:A","FSNTOAC:A","FSUTOA:A","LHFLX:A","LWCF:A","PBLH:A","PRECC:A","PRECL:A","PS:A","QREFHT:A","SHFLX:A","SOLIN:A","SWCF:A","TREFHT:A","TS:A","U10:A","Z3:A",
 fincl2 = "CLDICE:A", "CLDLIQ:A", "CLOUD:A", "OMEGA:A","PS:A", "Q:A", "QRL:A","QRS:A", "T:A", "U:A", "V:A", "Z3:A" 
-hfilename_spec = "%c.icdate_${current_date}.cam.h%t.%y-%m-%d-%s.nc"
 /
 EOF
 
@@ -149,8 +163,10 @@ EOF
 
   #--- yhc note: It seems like if one job is still in queue but another job is submitted. The previous job will use the setup of the following job.
   #              To avoid this situation, make this script sleep for 2 mins.
-  echo "sleep 2 mins in case the previos job uses the setup of the following job..."  
-  sleep 120
+  if [ $do_sleep == "T" ]; then
+    echo "sleep [$sleep_seconds] seconds in case the previos job uses the setup of the following job..."  
+    sleep $sleep_seconds
+  fi
 
 done  # end loop of current_date
 
