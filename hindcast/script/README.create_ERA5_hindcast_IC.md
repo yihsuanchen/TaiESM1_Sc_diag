@@ -11,8 +11,12 @@ Time: 00Z on each day
 -  ERA5 hourly data on single levels from 1940 to present
   - https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-single-levels?tab=overview
 
-Convert a String Time to/from a Numeric Time
-https://www.ncei.noaa.gov/erddap/convert/time.html
+- Useful functions:
+  - Convert a String Time to/from a Numeric Time, https://www.ncei.noaa.gov/erddap/convert/time.html
+
+You can rename the files as 
+- ERA5_PRS.t_q_u_v.${yyyy}${mm}_00Z.r1440x721.nc      
+- ERA5_SFC.sp.${yyyy}${mm}_00Z.r1440x721.nc
 
 **Step-by-step instruction**
 1. Edit and run createIC_01a-icdata_select_time_loop.sh.
