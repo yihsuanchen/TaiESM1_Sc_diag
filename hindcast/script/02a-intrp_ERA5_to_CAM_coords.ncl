@@ -43,7 +43,6 @@ begin
     print("Output ref file    : "+outfile_ref)
     print("Output file        : "+filename_out)
 
-
 ;--------------------------------
 ; Open files and read variables
 ;--------------------------------
@@ -52,6 +51,13 @@ begin
     file_prs  = addfile(filename_prs,"r")
     file_sfc  = addfile(filename_sfc,"r")
     file_cami = addfile(outfile_ref,"r")
+
+    ;--- time in prs and sfc files
+    time_prs = cd_calendar(file_prs->time, 3)  ; option = -3 The values returned will be in the format YYYYMMDDHH 
+    time_sfc = cd_calendar(file_sfc->time, 3)  ; option = -3 The values returned will be in the format YYYYMMDDHH 
+
+    print("Time in ERA5 PRS: "+time_prs)
+    print("Time in ERA5 SFC: "+time_sfc)
 
     ;--- read cami variables
     lon_cami = file_cami->lon
