@@ -33,9 +33,9 @@ CASE="$WRKDIR/$CASENAME"
 icdata_path="/work/yihsuan123/data/data.TaiESM1_hindcast/data.July2001_ERA5.hindcast/"
 icdata_filehead="cami-snap_0000-01-01_0.9x1.25_L30.ERA5_ic."
 icdata_fileend=".nc"
-start_date=20010725
-end_date=20010731
-#end_date=$start_date
+start_date=20010704
+#end_date=20010704
+end_date=$start_date
 hh="00Z"
 
 #--- stop options
@@ -137,6 +137,7 @@ while [ "$current_date" -le "$end_date" ]; do
 #--- cam namelist
 #    ref: CAM namelist variables: https://www2.cesm.ucar.edu/models/cesm1.2/cesm/doc/modelnl/nl_cam.html
 #         CESM Tutorial: https://ncar.github.io/CESM-Tutorial/README.html#
+#         CESM1 output fields: https://www2.cesm.ucar.edu/models/cesm1.0/cam/docs/ug5_0/hist_flds_fv_cam4.html
 #         CESM2 output fields: https://www2.cesm.ucar.edu/models/cesm2/atmosphere/docs/ug6/hist_flds_f2000.html
   cat > ./user_nl_cam << EOF
 &cam_inparm
@@ -145,8 +146,8 @@ mfilt  = 24, 8
 ncdata = '${file1}'
 hfilename_spec = "%c.icdate_${current_date}.cam.h%t.%y-%m-%d-%s.nc", "%c.icdate_${current_date}.cam.h%t.%y-%m-%d-%s.nc"
 empty_htapes = .true. 
-fincl1 = "CLDHGH:A","CLDLOW:A","CLDMED:A","CLDTOT:A","FLDS:A","FLNS:A","FLNSC:A","FLUT:A","FLUTC:A","FSDS:A","FSDSC:A","FSNS:A","FSNSC:A","FSNTOA:A","FSNTOAC:A","FSUTOA:A","LHFLX:A","LWCF:A","PBLH:A","PRECC:A","PRECL:A","PS:A","QREFHT:A","SHFLX:A","SOLIN:A","SWCF:A","TREFHT:A","TS:A","U10:A","Z3:A",
-fincl2 = "CLDICE:A", "CLDLIQ:A", "CLOUD:A", "OMEGA:A","PS:A", "Q:A", "QRL:A","QRS:A", "T:A", "U:A", "V:A", "Z3:A" 
+fincl1 = "CLDHGH:A","CLDLOW:A","CLDMED:A","CLDTOT:A","FLDS:A","FLNS:A","FLNSC:A","FLUT:A","FLUTC:A","FSDS:A","FSDSC:A","FSNS:A","FSNSC:A","FSNTOA:A","FSNTOAC:A","FSUTOA:A","LHFLX:A","LWCF:A","PBLH:A","PRECC:A","PRECL:A","PS:A","QREFHT:A","SHFLX:A","SOLIN:A","SWCF:A","TREFHT:A","TS:A","U10:A","Z3:A","TGCLDIWP:A","TGCLDLWP:A",
+fincl2 = "CLDICE:A", "CLDLIQ:A", "CLOUD:A", "OMEGA:A","PS:A", "Q:A", "QRL:A","QRS:A", "T:A", "U:A", "V:A", "Z3:A","DTCORE:A","VAT:A" 
 /
 EOF
 
