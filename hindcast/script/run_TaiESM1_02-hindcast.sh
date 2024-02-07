@@ -33,14 +33,14 @@ CASE="$WRKDIR/$CASENAME"
 icdata_path="/work/yihsuan123/data/data.TaiESM1_hindcast/data.July2001_ERA5.hindcast/"
 icdata_filehead="cami-snap_0000-01-01_0.9x1.25_L30.ERA5_ic."
 icdata_fileend=".nc"
-start_date=20010704
-#end_date=20010704
-end_date=$start_date
+start_date=20010701
+end_date=20010710
+#end_date=$start_date
 hh="00Z"
 
 #--- stop options
 STOP_OPTION="ndays"
-STOP_N=5
+STOP_N=1
 
 #--- pause for 1 second in case you want to stop the script (set do_pause=F to skip)
 do_pause="T"
@@ -137,19 +137,26 @@ while [ "$current_date" -le "$end_date" ]; do
 #--- cam namelist
 #    ref: CAM namelist variables: https://www2.cesm.ucar.edu/models/cesm1.2/cesm/doc/modelnl/nl_cam.html
 #         CESM Tutorial: https://ncar.github.io/CESM-Tutorial/README.html#
-#         CESM1 output fields: https://www2.cesm.ucar.edu/models/cesm1.0/cam/docs/ug5_0/hist_flds_fv_cam4.html
+#         CESM1 output fields: https://www2.cesm.ucar.edu/models/cesm1.0/cam/docs/ug5_0/hist_flds_fv_cam4.html, search "Master Field List"
 #         CESM2 output fields: https://www2.cesm.ucar.edu/models/cesm2/atmosphere/docs/ug6/hist_flds_f2000.html
   cat > ./user_nl_cam << EOF
 &cam_inparm
-nhtfrq = -1, -3
-mfilt  = 24, 8
+nhtfrq = -1, -3, -3, -3
+mfilt  = 24, 8, 8, 8
 ncdata = '${file1}'
-hfilename_spec = "%c.icdate_${current_date}.cam.h%t.%y-%m-%d-%s.nc", "%c.icdate_${current_date}.cam.h%t.%y-%m-%d-%s.nc"
+hfilename_spec = "%c.icdate_${current_date}.cam.h%t_2d_1h.%y-%m-%d-%s.nc", "%c.icdate_${current_date}.cam.h%t_state_3h.%y-%m-%d-%s.nc","%c.icdate_${current_date}.cam.h%t_Ttend_3h.%y-%m-%d-%s.nc", "%c.icdate_${current_date}.cam.h%t_Qtend_3h.%y-%m-%d-%s.nc"
 empty_htapes = .true. 
-fincl1 = "CLDHGH:A","CLDLOW:A","CLDMED:A","CLDTOT:A","FLDS:A","FLNS:A","FLNSC:A","FLUT:A","FLUTC:A","FSDS:A","FSDSC:A","FSNS:A","FSNSC:A","FSNTOA:A","FSNTOAC:A","FSUTOA:A","LHFLX:A","LWCF:A","PBLH:A","PRECC:A","PRECL:A","PS:A","QREFHT:A","SHFLX:A","SOLIN:A","SWCF:A","TREFHT:A","TS:A","U10:A","Z3:A","TGCLDIWP:A","TGCLDLWP:A",
-fincl2 = "CLDICE:A", "CLDLIQ:A", "CLOUD:A", "OMEGA:A","PS:A", "Q:A", "QRL:A","QRS:A", "T:A", "U:A", "V:A", "Z3:A","DTCORE:A","VAT:A" 
+
+fincl1 = "CLDHGH:A","CLDLOW:A","CLDMED:A","CLDTOT:A","FLDS:A","FLNS:A","FLNSC:A","FLUT:A","FLUTC:A","FSDS:A","FSDSC:A","FSNS:A","FSNSC:A","FSNTOA:A","FSNTOAC:A","FSUTOA:A","LHFLX:A","LWCF:A","PBLH:A","PRECC:A","PRECL:A","PS:A","QREFHT:A","SHFLX:A","SOLIN:A","SWCF:A","TREFHT:A","TS:A","U10:A","Z3:A","TGCLDIWP:A","TGCLDLWP:A","CONCLD:A","TMQ:A","AST:A","SST:A"
+
+fincl2 = "CLDICE:A", "CLDLIQ:A", "CLOUD:A", "OMEGA:A","PS:A", "Q:A", "T:A", "U:A", "V:A", "Z3:A", "RELHUM:A"
+
+fincl3 = "DTCORE:A","VAT:A","CMFDT:A","DTCOND:A","DTV:A","tten_PBL:A","MPDT:A","TTEND:A", "QRL:A","QRS:A", "PS:A", "Z3:A", "PTTEND:A","MACPDT:A"
+
+fincl4 = "CMFDQ:A","DCQ:A","qlten_PBL:A","qvten_PBL:A","CMFDLIQ:A","MPDLIQ:A","MPDQ:A","PTECLDLIQ:A", "PS:A", "Z3:A","PTECLDLIQ:A", "PTEQ:A", "MACPDQ:A","MACPDLIQ:A"
 /
 EOF
+
 
   #--- do_pause
   if [ $do_pause == "T" ]; then
