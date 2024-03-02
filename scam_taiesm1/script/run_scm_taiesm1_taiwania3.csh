@@ -23,7 +23,10 @@
 #    2. Modify the variables in "setup for the SCAM run" section, such as the IOP case, model physics, etc.
 #    3. Run the script 
 #       > sbatch THIS_SCRIPT
-#    4. Check the results
+#
+#       if SCM fails to compile, you will get an notification email. The "*.err" and "*.out" log files will be in the folder where you run the script.
+#
+#    4. The SCM output will be at /work/$USER/$exp_name/$CASE/run  
 #
 #  Date:
 #    December 2023
