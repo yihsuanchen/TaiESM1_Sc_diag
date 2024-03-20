@@ -33,14 +33,14 @@ CASE="$WRKDIR/$CASENAME"
 icdata_path="/work/yihsuan123/data/data.TaiESM1_hindcast/data.July2001_ERA5.hindcast/"
 icdata_filehead="cami-snap_0000-01-01_0.9x1.25_L30.ERA5_ic."
 icdata_fileend=".nc"
-start_date=20010701
-end_date=20010710
-#end_date=$start_date
+start_date=20010726
+#end_date=20010630
+end_date=$start_date
 hh="00Z"
 
 #--- stop options
 STOP_OPTION="ndays"
-STOP_N=1
+STOP_N=6
 
 #--- pause for 1 second in case you want to stop the script (set do_pause=F to skip)
 do_pause="T"
@@ -136,7 +136,7 @@ while [ "$current_date" -le "$end_date" ]; do
 
 #--- cam namelist
 #    ref: CAM namelist variables: https://www2.cesm.ucar.edu/models/cesm1.2/cesm/doc/modelnl/nl_cam.html
-#         CESM Tutorial: https://ncar.github.io/CESM-Tutorial/README.html#
+#         Customize CAM output: https://ncar.github.io/CESM-Tutorial/notebooks/namelist/output/output_cam.html
 #         CESM1 output fields: https://www2.cesm.ucar.edu/models/cesm1.0/cam/docs/ug5_0/hist_flds_fv_cam4.html, search "Master Field List"
 #         CESM2 output fields: https://www2.cesm.ucar.edu/models/cesm2/atmosphere/docs/ug6/hist_flds_f2000.html
   cat > ./user_nl_cam << EOF
@@ -151,9 +151,9 @@ fincl1 = "CLDHGH:A","CLDLOW:A","CLDMED:A","CLDTOT:A","FLDS:A","FLNS:A","FLNSC:A"
 
 fincl2 = "CLDICE:A", "CLDLIQ:A", "CLOUD:A", "OMEGA:A","PS:A", "Q:A", "T:A", "U:A", "V:A", "Z3:A", "RELHUM:A"
 
-fincl3 = "DTCORE:A","VAT:A","CMFDT:A","DTCOND:A","DTV:A","tten_PBL:A","MPDT:A","TTEND:A", "QRL:A","QRS:A", "PS:A", "Z3:A", "PTTEND:A","MACPDT:A"
+fincl3 = "TTEND_TOT:A","DTCORE:A","PTTEND:A","ZMDT:A","EVAPTZM:A","FZSNTZM:A","EVSNTZM:A","ZMMTT:A","CMFDT:A","DPDLFT:A","SHDLFT:A", "MACPDT:A","MPDT:A","QRL:A","QRS:A","DTV:A","TTGWORO:A"
 
-fincl4 = "CMFDQ:A","DCQ:A","qlten_PBL:A","qvten_PBL:A","CMFDLIQ:A","MPDLIQ:A","MPDQ:A","PTECLDLIQ:A", "PS:A", "Z3:A","PTECLDLIQ:A", "PTEQ:A", "MACPDQ:A","MACPDLIQ:A"
+fincl4 = "PTEQ:A","ZMDQ:A","EVAPQZM:A","CMFDQ:A","MACPDQ:A","MPDQ:A","VD01:A", "PTECLDLIQ:A","ZMDLIQ:A","CMFDLIQ:A","DPDLFLIQ:A","SHDLFLIQ:A","MACPDLIQ:A","MPDLIQ:A","VDCLDLIQ:A","PTECLDICE:A","ZMDICE:A","CMFDICE:A","DPDLFICE:A","SHDLFICE:A","MACPDICE:A","MPDICE:A","VDCLDICE:A"
 /
 EOF
 
