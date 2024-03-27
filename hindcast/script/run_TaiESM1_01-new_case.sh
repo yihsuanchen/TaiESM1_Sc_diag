@@ -28,27 +28,31 @@ temp=`date +%m%d_%H%M`
 yyyymmdd=`date  +%Y_%m_%d`
 
 #--- TaiESM source code folder
-CCSMROOT="/work/yihsuan123/taiesm_ver170803_yhcTEST/"
+CCSMROOT="/work/yihsuan123/taiesm_ver170803/"
 
 #--- simulation setup
 compset="F_2000_TAI"
 res="f09_f09"
 
 STOP_OPTION="ndays"
-STOP_N=5
+STOP_N=1
 
 #--- simulation case
 WRKDIR="/work/yihsuan123/taiesm1_test_hindcast/"
 #CASENAME="xx01-taiesm1.${compset}.${res}.${temp}"
-CASENAME="hindcast01_2001July-taiesm1.${compset}.${res}"
+CASENAME="y1-hindcast_2001July-taiesm1.${compset}.${res}.${temp}"
 CASE="$WRKDIR/$CASENAME"
 
 #--- slurm setup
-do_submit="F"        # "T": submit the job
+do_submit="T"        # "T": submit the job
 
 account="MST112228"  # account name on Taiwania 3
 queue="ct224"        # name of queue on Taiwania 3. Use "sinfo -s" to view the available queue
 num_cpu=128          # number of cpu
+
+#--- source code change
+do_srcmod="T"
+srcmod_dir="/home/yihsuan123/research/TaiESM1_Sc_diag/scam_taiesm1/script/scam_mods"
 
 ##################
 # program start
@@ -57,6 +61,14 @@ num_cpu=128          # number of cpu
 #--- get this script name
 this_script="`pwd`/$0"
 script_backup="$CASE/zz-run.${CASENAME}.sh"
+
+#--- check whether $srcmod_dir exist
+if [ $do_srcmod == "T" ]; then
+  if [ ! -d $srcmod_dir ]; then
+    echo "ERROR: srcmod_dir [$srcmod_dir] does not exist. STOP"
+    exit 1
+  fi
+fi
 
 #------------
 # Build the model
@@ -92,6 +104,11 @@ nhtfrq = 24
 mfilt  = 12
 /
 EOF
+
+#--- source code change
+if [ $do_srcmod == "T" ]; then
+  cp $srcmod_dir/* ./SourceMods/src.cam && echo "Done. copy codes from [$srcmod_dir] to [./SourceMods/src.cam]" || exit 301
+fi
 
 #--- cesm_setup
 ./cesm_setup  || exit 1
