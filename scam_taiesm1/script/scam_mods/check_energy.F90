@@ -67,6 +67,12 @@ module check_energy
   integer  :: teout_idx  = 0       ! teout index in physics buffer 
   integer  :: dtcore_idx = 0       ! dtcore index in physics buffer 
 
+!<--- yhc, 2024-03-27 
+  integer  ::      dqvcore_idx = 0
+  integer  ::      dqlcore_idx = 0
+  integer  ::      dqicore_idx = 0
+!---> yhc, 2024-03-27 
+
   type check_tracers_data
      real(r8) :: tracer(pcols,pcnst)       ! initial vertically integrated total (kinetic + static) energy
      real(r8) :: tracer_tnd(pcols,pcnst)   ! cumulative boundary flux of total energy
@@ -126,6 +132,12 @@ end subroutine check_energy_setopts
     call pbuf_add_field('TEOUT', 'global',dtype_r8 , (/pcols,pbuf_times/),     teout_idx)
     call pbuf_add_field('DTCORE','global',dtype_r8,  (/pcols,pver,pbuf_times/),dtcore_idx )
 
+    !<--- yhc, 2024-03-27 
+    call pbuf_add_field('DQVCORE','global',dtype_r8,  (/pcols,pver,pbuf_times/),dqvcore_idx )
+    call pbuf_add_field('DQLCORE','global',dtype_r8,  (/pcols,pver,pbuf_times/),dqlcore_idx )
+    call pbuf_add_field('DQICORE','global',dtype_r8,  (/pcols,pver,pbuf_times/),dqicore_idx )
+    !---> yhc, 2024-03-27 
+
   end subroutine check_energy_register
 
 !===============================================================================
@@ -178,12 +190,23 @@ end subroutine check_energy_get_integrals
     call addfld('TEFIX   ', 'W/m2', 1,    'A', 'Total energy after fixer',         phys_decomp)
     call addfld('DTCORE'  , 'K/s' , pver, 'A', 'T tendency due to dynamical core', phys_decomp)
 
+    !<--- yhc 2024-03-27
+    call addfld('DQVCORE'  , 'K/s' , pver, 'A', 'Q tendency due to dynamical core', phys_decomp)
+    call addfld('DQLCORE'  , 'K/s' , pver, 'A', 'Cloud liquid tendency due to dynamical core', phys_decomp)
+    call addfld('DQICORE'  , 'K/s' , pver, 'A', 'Cloud ice tendency due to dynamical core', phys_decomp)
+    !---> yhc 2024-03-27
+
     if (masterproc) then
        write (iulog,*) ' print_energy_errors is set', print_energy_errors
     endif
 
    if ( history_budget ) then
       call add_default ('DTCORE   '  , history_budget_histfile_num, ' ')
+      !<--- yhc 2024-03-27
+      call add_default ('DQVCORE   '  , history_budget_histfile_num, ' ')
+      call add_default ('DQLCORE   '  , history_budget_histfile_num, ' ')
+      call add_default ('DQICORE   '  , history_budget_histfile_num, ' ')
+      !---> yhc 2024-03-27
    end if
 
   end subroutine check_energy_init
