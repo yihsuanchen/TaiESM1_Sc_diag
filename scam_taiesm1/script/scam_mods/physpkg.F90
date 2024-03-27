@@ -61,6 +61,12 @@ module physpkg
   integer ::  prec_sh_idx        = 0
   integer ::  snow_sh_idx        = 0
 
+!<--- yhc, 2024-03-27 
+  integer  ::      dqvcore_idx = 0
+  integer  ::      dqlcore_idx = 0
+  integer  ::      dqicore_idx = 0
+!---> yhc, 2024-03-27 
+  
 
   save
 
@@ -1302,6 +1308,7 @@ subroutine tphysac (ztodt,   cam_in,  &
     real(r8), pointer, dimension(:,:) :: cldiceini
     real(r8), pointer, dimension(:,:) :: dtcore
     real(r8), pointer, dimension(:,:) :: ast     ! relative humidity cloud fraction 
+    real(r8), pointer, dimension(:,:) :: dqvcore, dqlcore, dqicore  ! yhc 2024-03-27
 
     logical :: do_clubb_sgs 
 
@@ -1334,6 +1341,16 @@ subroutine tphysac (ztodt,   cam_in,  &
 
     ifld = pbuf_get_index('DTCORE')
     call pbuf_get_field(pbuf, ifld, dtcore, start=(/1,1,itim/), kount=(/pcols,pver,1/) )
+
+    !<--- yhc, 2024-03-27 
+    ifld = pbuf_get_index('DQVCORE')
+    call pbuf_get_field(pbuf, ifld, dqvcore, start=(/1,1,itim/), kount=(/pcols,pver,1/) )
+    ifld = pbuf_get_index('DQLCORE')
+    call pbuf_get_field(pbuf, ifld, dqlcore, start=(/1,1,itim/), kount=(/pcols,pver,1/) )
+    ifld = pbuf_get_index('DQICORE')
+    call pbuf_get_field(pbuf, ifld, dqicore, start=(/1,1,itim/), kount=(/pcols,pver,1/) )
+    !---> yhc, 2024-03-27 
+
 
     call pbuf_get_field(pbuf, tini_idx, tini)
     call pbuf_get_field(pbuf, qini_idx, qini)
@@ -1544,6 +1561,14 @@ subroutine tphysac (ztodt,   cam_in,  &
        dtcore(:ncol,k) = state%t(:ncol,k)
     end do
 
+    !<--- yhc, 2024-03-27 
+    do k = 1,pver
+       dqvcore(:ncol,k) = state%q(:ncol,k,1)
+       dqlcore(:ncol,k) = state%q(:ncol,k,2)
+       dqicore(:ncol,k) = state%q(:ncol,k,3)
+    end do
+    !---> yhc, 2024-03-27 
+
 
     !
     ! FV: convert dry-type mixing ratios to moist here because physics_dme_adjust
@@ -1714,6 +1739,7 @@ subroutine tphysbc (ztodt,               &
     real(r8), pointer, dimension(:,:) :: cldliqini
     real(r8), pointer, dimension(:,:) :: cldiceini
     real(r8), pointer, dimension(:,:) :: dtcore
+    real(r8), pointer, dimension(:,:) :: dqvcore, dqlcore, dqicore  ! yhc 2024-03-27
 
     real(r8), pointer, dimension(:,:,:) :: fracis  ! fraction of transported species that are insoluble
 
@@ -1791,6 +1817,15 @@ subroutine tphysbc (ztodt,               &
 
     ifld   =  pbuf_get_index('DTCORE')
     call pbuf_get_field(pbuf, ifld, dtcore, start=(/1,1,itim/), kount=(/pcols,pver,1/) )
+
+    !<--- yhc, 2024-03-27 
+    ifld = pbuf_get_index('DQVCORE')
+    call pbuf_get_field(pbuf, ifld, dqvcore, start=(/1,1,itim/), kount=(/pcols,pver,1/) )
+    ifld = pbuf_get_index('DQLCORE')
+    call pbuf_get_field(pbuf, ifld, dqlcore, start=(/1,1,itim/), kount=(/pcols,pver,1/) )
+    ifld = pbuf_get_index('DQICORE')
+    call pbuf_get_field(pbuf, ifld, dqicore, start=(/1,1,itim/), kount=(/pcols,pver,1/) )
+    !---> yhc, 2024-03-27 
 
     ifld    = pbuf_get_index('FRACIS')
     call pbuf_get_field(pbuf, ifld, fracis, start=(/1,1,1/), kount=(/pcols, pver, pcnst/)  )
@@ -1880,6 +1915,19 @@ subroutine tphysbc (ztodt,               &
        end do
        call outfld( 'DTCORE', dtcore, pcols, lchnk )
     end if
+
+    !<--- yhc, 2024-03-27
+    if( nstep > pbuf_times-1 ) then
+       do k = 1,pver
+          dqvcore(:ncol,k) = (qini(:ncol,k) - dqvcore(:ncol,k))/(ztodt)   ! tend% seem zeros
+          dqlcore(:ncol,k) = (cldliqini(:ncol,k) - dqlcore(:ncol,k))/(ztodt)   ! tend% seem zeros
+          dqicore(:ncol,k) = (cldiceini(:ncol,k) - dqicore(:ncol,k))/(ztodt)   ! tend% seem zeros
+       end do
+       call outfld( 'DQVCORE', dqvcore, pcols, lchnk )
+       call outfld( 'DQLCORE', dqlcore, pcols, lchnk )
+       call outfld( 'DQICORE', dqicore, pcols, lchnk )
+    end if
+    !---> yhc, 2024-03-27
 
     call t_stopf('energy_fixer')
     !
