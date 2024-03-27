@@ -203,9 +203,9 @@ subroutine diag_init()
    call addfld ('TTEND_TOT   ','K/s' ,pver, 'A','Total temperature tendency'   ,phys_decomp)
 
    !<--- yhc, 2024-03-27 
-   call addfld ('QVTEND_TOT   ','K/s' ,pver, 'A','Total specific humidity tendency'   ,phys_decomp)
-   call addfld ('QLTEND_TOT   ','K/s' ,pver, 'A','Total cloud liquid tendency'   ,phys_decomp)
-   call addfld ('QITEND_TOT   ','K/s' ,pver, 'A','Total cloud ice tendency'   ,phys_decomp)
+   call addfld ('QVTEND_TOT   ','kg/kg/s' ,pver, 'A','Total specific humidity tendency'   ,phys_decomp)
+   call addfld ('QLTEND_TOT   ','kg/kg/s' ,pver, 'A','Total cloud liquid tendency'   ,phys_decomp)
+   call addfld ('QITEND_TOT   ','kg/kg/s' ,pver, 'A','Total cloud ice tendency'   ,phys_decomp)
    !---> yhc, 2024-03-27 
   
    ! column burdens for all constituents except water vapor
