@@ -96,6 +96,12 @@ integer  ::      snow_pcw_idx = 0
 
 integer :: tpert_idx=-1, qpert_idx=-1, pblh_idx=-1
 
+!<--- yhc, 2024-03-27 
+integer  ::      qv_ttend_idx = 0
+integer  ::      ql_ttend_idx = 0
+integer  ::      qi_ttend_idx = 0
+!---> yhc, 2024-03-27 
+
 contains
 
 ! ===============================================================================
@@ -104,6 +110,12 @@ subroutine diag_register
     
    ! Request physics buffer space for fields that persist across timesteps.
    call pbuf_add_field('T_TTEND', 'global', dtype_r8, (/pcols,pver,pbuf_times/), t_ttend_idx)
+
+   !<--- yhc, 2024-03-27 
+   call pbuf_add_field('QV_TTEND', 'global', dtype_r8, (/pcols,pver,pbuf_times/), qv_ttend_idx)
+   call pbuf_add_field('QL_TTEND', 'global', dtype_r8, (/pcols,pver,pbuf_times/), ql_ttend_idx)
+   call pbuf_add_field('QI_TTEND', 'global', dtype_r8, (/pcols,pver,pbuf_times/), qi_ttend_idx)
+   !---> yhc, 2024-03-27 
 
 end subroutine diag_register
 
@@ -189,6 +201,12 @@ subroutine diag_init()
                    'T-tendency due to BAB kluge at end of tphysac (diagnostic not part of T-budget)' ,phys_decomp)
    end if
    call addfld ('TTEND_TOT   ','K/s' ,pver, 'A','Total temperature tendency'   ,phys_decomp)
+
+   !<--- yhc, 2024-03-27 
+   call addfld ('QVTEND_TOT   ','K/s' ,pver, 'A','Total specific humidity tendency'   ,phys_decomp)
+   call addfld ('QLTEND_TOT   ','K/s' ,pver, 'A','Total cloud liquid tendency'   ,phys_decomp)
+   call addfld ('QITEND_TOT   ','K/s' ,pver, 'A','Total cloud ice tendency'   ,phys_decomp)
+   !---> yhc, 2024-03-27 
   
    ! column burdens for all constituents except water vapor
    call constituent_burden_init
@@ -328,6 +346,11 @@ subroutine diag_init()
       call add_default ('V       '  , history_budget_histfile_num, ' ')
       call add_default (cnst_name(1), history_budget_histfile_num, ' ')
       call add_default ('TTEND_TOT' , history_budget_histfile_num, ' ')
+      !<--- yhc, 2024-03-27 
+      call add_default ('QVTEND_TOT' , history_budget_histfile_num, ' ')
+      call add_default ('QLTEND_TOT' , history_budget_histfile_num, ' ')
+      call add_default ('QITEND_TOT' , history_budget_histfile_num, ' ')
+      !---> yhc, 2024-03-27 
       ! State before physics (FV)
       call add_default ('TBP     '  , history_budget_histfile_num, ' ')
       call add_default (bpcnst(1)   , history_budget_histfile_num, ' ')
@@ -702,6 +725,7 @@ subroutine diag_conv_tend_ini(state,pbuf)
 
    integer :: i, k, m, lchnk, ncol
    real(r8), pointer, dimension(:,:) :: t_ttend
+   real(r8), pointer, dimension(:,:) :: qv_ttend, ql_ttend, qi_ttend  ! yhc 2024-03-27
 
    lchnk = state%lchnk
    ncol  = state%ncol
@@ -725,6 +749,16 @@ subroutine diag_conv_tend_ini(state,pbuf)
       do m = 1, pbuf_times
          call pbuf_get_field(pbuf, t_ttend_idx, t_ttend, start=(/1,1,m/), kount=(/pcols,pver,1/))
          t_ttend(:ncol,:) = state%t(:ncol,:)
+
+         !<--- yhc, 2024-03-27
+         call pbuf_get_field(pbuf, qv_ttend_idx, qv_ttend, start=(/1,1,m/), kount=(/pcols,pver,1/))
+         call pbuf_get_field(pbuf, ql_ttend_idx, ql_ttend, start=(/1,1,m/), kount=(/pcols,pver,1/))
+         call pbuf_get_field(pbuf, qi_ttend_idx, qi_ttend, start=(/1,1,m/), kount=(/pcols,pver,1/))
+         qv_ttend(:ncol,:) = state%q(:ncol,:,1)
+         ql_ttend(:ncol,:) = state%q(:ncol,:,2)
+         qi_ttend(:ncol,:) = state%q(:ncol,:,3)
+         !---> yhc, 2024-03-27
+
       end do
    end if
 
@@ -1615,6 +1649,7 @@ subroutine diag_phys_tend_writeout(state, pbuf,  tend, ztodt, tmp_q, tmp_cldliq,
    integer  :: ixcldice, ixcldliq! constituent indices for cloud liquid and ice water.
    ! CAM pointers to get variables from the physics buffer
    real(r8), pointer, dimension(:,:) :: t_ttend  
+   real(r8), pointer, dimension(:,:) :: qv_ttend, ql_ttend, qi_ttend  ! yhc 2024-03-27
    integer  :: itim
 
    !-----------------------------------------------------------------------
@@ -1692,6 +1727,27 @@ subroutine diag_phys_tend_writeout(state, pbuf,  tend, ztodt, tmp_q, tmp_cldliq,
 
    !! update physics buffer with this time-step's temperature
    t_ttend(:ncol,:) = state%t(:ncol,:)
+
+   !<--- yhc, 2024-03-27 
+
+   !--- qv
+   call pbuf_get_field(pbuf, qv_ttend_idx, qv_ttend, start=(/1,1,itim/), kount=(/pcols,pver,1/))
+   ftem3(:ncol,:) = (state%q(:ncol,:,1) - qv_ttend(:ncol,:))/ztodt  !! calculate and outfld the total temperature tendency
+   call outfld('QVTEND_TOT', ftem3, pcols, lchnk)
+   qv_ttend(:ncol,:) = state%q(:ncol,:,1)  !! update physics buffer with this time-step's temperature
+
+   !--- ql
+   call pbuf_get_field(pbuf, ql_ttend_idx, ql_ttend, start=(/1,1,itim/), kount=(/pcols,pver,1/))
+   ftem3(:ncol,:) = (state%q(:ncol,:,2) - ql_ttend(:ncol,:))/ztodt  !! calculate and outfld the total temperature tendency
+   call outfld('QLTEND_TOT', ftem3, pcols, lchnk)
+   ql_ttend(:ncol,:) = state%q(:ncol,:,2)  !! update physics buffer with this time-step's temperature
+
+   !--- qi
+   call pbuf_get_field(pbuf, qi_ttend_idx, qi_ttend, start=(/1,1,itim/), kount=(/pcols,pver,1/))
+   ftem3(:ncol,:) = (state%q(:ncol,:,3) - qi_ttend(:ncol,:))/ztodt  !! calculate and outfld the total temperature tendency
+   call outfld('QITEND_TOT', ftem3, pcols, lchnk)
+   qi_ttend(:ncol,:) = state%q(:ncol,:,3)  !! update physics buffer with this time-step's temperature
+   !---> yhc, 2024-03-27 
 
 end subroutine diag_phys_tend_writeout
 
