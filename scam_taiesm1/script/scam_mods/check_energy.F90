@@ -191,9 +191,9 @@ end subroutine check_energy_get_integrals
     call addfld('DTCORE'  , 'K/s' , pver, 'A', 'T tendency due to dynamical core', phys_decomp)
 
     !<--- yhc 2024-03-27
-    call addfld('DQVCORE'  , 'K/s' , pver, 'A', 'Q tendency due to dynamical core', phys_decomp)
-    call addfld('DQLCORE'  , 'K/s' , pver, 'A', 'Cloud liquid tendency due to dynamical core', phys_decomp)
-    call addfld('DQICORE'  , 'K/s' , pver, 'A', 'Cloud ice tendency due to dynamical core', phys_decomp)
+    call addfld('DQVCORE'  , 'kg/kg/s' , pver, 'A', 'Q tendency due to dynamical core', phys_decomp)
+    call addfld('DQLCORE'  , 'kg/kg/s' , pver, 'A', 'Cloud liquid tendency due to dynamical core', phys_decomp)
+    call addfld('DQICORE'  , 'kg/kg/s' , pver, 'A', 'Cloud ice tendency due to dynamical core', phys_decomp)
     !---> yhc 2024-03-27
 
     if (masterproc) then
