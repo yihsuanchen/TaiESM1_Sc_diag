@@ -126,8 +126,9 @@ endif
 cd $BLDDIR || exit 1
 
 if ($phys == 'taiphy') then
-  $CAM_ROOT/models/atm/cam/bld/configure -s -chem $aero_mode -dyn eul -res 64x128 -nospmd -nosmp -scam -ocn dom -comp_intf mct -taiphy -debug -fc ifort -cc icc -fc_type intel -usr_src $SCAM_MODS \
-    || echo "ERROR: Configure failed." && exit 1
+  #$CAM_ROOT/models/atm/cam/bld/configure -s -chem $aero_mode -dyn eul -res 64x128 -nospmd -nosmp -scam -ocn dom -comp_intf mct -taiphy -debug -fc ifort -cc icc -fc_type intel -usr_src $SCAM_MODS \
+  $CAM_ROOT/models/atm/cam/bld/configure -s -dyn eul -res 64x128 -nospmd -nosmp -scam -ocn dom -comp_intf mct -taiphy -debug -fc ifort -cc icc -fc_type intel -usr_src $SCAM_MODS \
+    || echo "ERROR: Configure failed." && exit 1   # when using taiphy, don't need to specify -chem $aero_mode
 else
   $CAM_ROOT/models/atm/cam/bld/configure -s -chem $aero_mode -dyn eul -res 64x128 -nospmd -nosmp -scam -ocn dom -comp_intf mct -phys $phys -debug -fc ifort -cc icc -fc_type intel -usr_src $SCAM_MODS \
     || echo "ERROR: Configure failed." && exit 1
@@ -173,6 +174,9 @@ cat <<EOF >! tmp_namelistfile
     stop_n               = 1872,
     stop_option          = 'nsteps'
 /
+
+fincl1 = "TTEND_TOT:A","DTCORE:A","PTTEND:A","ZMDT:A","EVAPTZM:A","FZSNTZM:A","EVSNTZM:A","ZMMTT:A","CMFDT:A","DPDLFT:A","SHDLFT:A", "MACPDT:A","MPDT:A","QRL:A","QRS:A","DTV:A","TTGWORO:A", "PTEQ:A","ZMDQ:A","EVAPQZM:A","CMFDQ:A","MACPDQ:A","MPDQ:A","VD01:A", "PTECLDLIQ:A","ZMDCLDLIQ:A","CMFDCLDLIQ:A","MACPDCLDLIQ:A","MPDCLDLIQ:A","VDCLDLIQ:A", "PTECLDICE:A","ZMDCLDICE:A","CMFDCLDICE:A","MACPDCLDICE:A","MPDCLDICE:A","VDCLDICE:A", "DPDLFLIQ:A","DPDLFICE:A","SHDLFLIQ:A","SHDLFICE:A","DPDLFT:A","SHDLFT:A","QVTEND_TOT:A","QLTEND_TOT:A","QITEND_TOT:A","DQVCORE:A","DQLCORE:A","DQICORE:A"
+
 EOF
 
 #--- default namelist
