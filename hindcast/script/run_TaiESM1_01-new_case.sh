@@ -40,11 +40,12 @@ STOP_N=1
 #--- simulation case
 WRKDIR="/work/yihsuan123/taiesm1_test_hindcast/"
 #CASENAME="xx01-taiesm1.${compset}.${res}.${temp}"
-CASENAME="y1-hindcast_2001July-taiesm1.${compset}.${res}.${temp}"
+#CASENAME="y1-hindcast_2001July-taiesm1.${compset}.${res}.${temp}"
+CASENAME="hindcast02_2001July-taiesm1.${compset}.${res}"
 CASE="$WRKDIR/$CASENAME"
 
 #--- slurm setup
-do_submit="T"        # "T": submit the job
+do_submit="F"        # "T": submit the job
 
 account="MST112228"  # account name on Taiwania 3
 queue="ct224"        # name of queue on Taiwania 3. Use "sinfo -s" to view the available queue
@@ -126,6 +127,7 @@ if [ $do_submit == "T" ]; then
   ./$CASENAME.submit || exit 1
 else
   echo "Please submit the job manually at [$CASE]"
+  echo "For hindcast simulations, please submit the runs using run_TaiESM1_02-hindcast.sh"
 fi
 
 #--- back up this script
