@@ -26,21 +26,22 @@
 #--- existing TaiESM1 case
 WRKDIR="/work/yihsuan123/taiesm1_test_hindcast/"
 #CASENAME="xx01-taiesm1.F_2000_TAI.f09_f09.1226_1050"
-CASENAME="hindcast01_2001July-taiesm1.F_2000_TAI.f09_f09"
+CASENAME="hindcast02_2001July-taiesm1.F_2000_TAI.f09_f09"
+#CASENAME="y1-hindcast_2001July-taiesm1.F_2000_TAI.f09_f09.0327_2045"
 CASE="$WRKDIR/$CASENAME"
 
 #--- initial condition data for each hindcase run
 icdata_path="/work/yihsuan123/data/data.TaiESM1_hindcast/data.July2001_ERA5.hindcast/"
 icdata_filehead="cami-snap_0000-01-01_0.9x1.25_L30.ERA5_ic."
 icdata_fileend=".nc"
-start_date=20010726
+start_date=20010701
 #end_date=20010630
 end_date=$start_date
 hh="00Z"
 
 #--- stop options
 STOP_OPTION="ndays"
-STOP_N=6
+STOP_N=1
 
 #--- pause for 1 second in case you want to stop the script (set do_pause=F to skip)
 do_pause="T"
@@ -153,7 +154,7 @@ fincl2 = "CLDICE:A", "CLDLIQ:A", "CLOUD:A", "OMEGA:A","PS:A", "Q:A", "T:A", "U:A
 
 fincl3 = "TTEND_TOT:A","DTCORE:A","PTTEND:A","ZMDT:A","EVAPTZM:A","FZSNTZM:A","EVSNTZM:A","ZMMTT:A","CMFDT:A","DPDLFT:A","SHDLFT:A", "MACPDT:A","MPDT:A","QRL:A","QRS:A","DTV:A","TTGWORO:A"
 
-fincl4 = "PTEQ:A","ZMDQ:A","EVAPQZM:A","CMFDQ:A","MACPDQ:A","MPDQ:A","VD01:A", "PTECLDLIQ:A","ZMDLIQ:A","CMFDLIQ:A","DPDLFLIQ:A","SHDLFLIQ:A","MACPDLIQ:A","MPDLIQ:A","VDCLDLIQ:A","PTECLDICE:A","ZMDICE:A","CMFDICE:A","DPDLFICE:A","SHDLFICE:A","MACPDICE:A","MPDICE:A","VDCLDICE:A"
+fincl4 = "PTEQ:A","ZMDQ:A","EVAPQZM:A","CMFDQ:A","MACPDQ:A","MPDQ:A","VD01:A", "PTECLDLIQ:A","ZMDLIQ:A","CMFDLIQ:A","DPDLFLIQ:A","SHDLFLIQ:A","MACPDLIQ:A","MPDLIQ:A","VDCLDLIQ:A","PTECLDICE:A","ZMDICE:A","CMFDICE:A","DPDLFICE:A","SHDLFICE:A","MACPDICE:A","MPDICE:A","VDCLDICE:A","QVTEND_TOT:A","QLTEND_TOT:A","QITEND_TOT:A","DQVCORE:A","DQLCORE:A","DQICORE:A"
 /
 EOF
 
