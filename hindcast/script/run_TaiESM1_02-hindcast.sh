@@ -34,14 +34,14 @@ CASE="$WRKDIR/$CASENAME"
 icdata_path="/work/yihsuan123/data/data.TaiESM1_hindcast/data.July2001_ERA5.hindcast/"
 icdata_filehead="cami-snap_0000-01-01_0.9x1.25_L30.ERA5_ic."
 icdata_fileend=".nc"
-start_date=20010701
-#end_date=20010630
+start_date=20010704
+#end_date=20010711
 end_date=$start_date
 hh="00Z"
 
 #--- stop options
 STOP_OPTION="ndays"
-STOP_N=1
+STOP_N=6
 
 #--- pause for 1 second in case you want to stop the script (set do_pause=F to skip)
 do_pause="T"
@@ -72,7 +72,8 @@ sleep_seconds=$((60 * 2))   # # seconds
 if [ $do_backup_script == "T" ]; then
   date_now=`date +%m%d_%H%M`
   this_script="`pwd`/$0"
-  script_backup="$CASE/zz-run_hindcast.${CASENAME}.sh.${date_now}"
+  #script_backup="$CASE/zz-run_hindcast.${CASENAME}.sh.${date_now}"
+  script_backup="$CASE/zz-run_TaiESM1_02-hindcast.${CASENAME}.sh.${date_now}"
   cp $this_script $script_backup && echo "Done. back up this script [$script_backup]" || exit 1
 fi
 
