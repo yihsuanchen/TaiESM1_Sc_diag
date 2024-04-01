@@ -60,8 +60,11 @@ srcmod_dir="/home/yihsuan123/research/TaiESM1_Sc_diag/scam_taiesm1/script/scam_m
 ##################
 
 #--- get this script name
+date_now=`date +%m%d_%H%M`
 this_script="`pwd`/$0"
-script_backup="$CASE/zz-run.${CASENAME}.sh"
+script_backup="$CASE/zz-run_TaiESM1_01-new_case.${CASENAME}.sh.${date_now}"
+
+run_TaiESM1_01-new_case.sh
 
 #--- check whether $srcmod_dir exist
 if [ $do_srcmod == "T" ]; then
