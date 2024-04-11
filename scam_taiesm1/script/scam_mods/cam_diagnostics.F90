@@ -291,6 +291,11 @@ subroutine diag_init()
    call addfld ('TH9251000  ','K     ',1,   'A','Theta difference 925 mb - 1000 mb',phys_decomp)   
    call addfld ('THE9251000 ','K     ',1,   'A','ThetaE difference 925 mb - 1000 mb',phys_decomp) 
 
+   !<--- yhc 2024-04-11
+   call addfld ('TGCLDLWP_ql','kg/m2',1,    'A','Total grid-box cloud liquid water path (CLDLIQ vint)',phys_decomp)
+   call addfld ('TGCLDIWP_qi','kg/m2',1,    'A','Total grid-box cloud ice water path (CLDICE vint)'   ,phys_decomp)
+   !---> yhc 2024-04-11
+
    ! This field is added by radiation when full physics is used
    if ( ideal_phys )then
       call addfld('QRS     ', 'K/s     ', pver, 'A', 'Solar heating rate', phys_decomp)
@@ -807,6 +812,13 @@ end subroutine diag_conv_tend_ini
     integer  plon             ! number of longitudes
 
     integer i, k, m, lchnk, ncol, nstep
+
+    !<--- yhc 2024-04-11
+    real(r8) :: gicewp(pcols,pver)      ! grid-box cloud ice water path
+    real(r8) :: gliqwp(pcols,pver)      ! grid-box cloud liquid water path
+    real(r8) :: tgicewp(pcols)          ! Vertically integrated ice water path
+    real(r8) :: tgliqwp(pcols)          ! Vertically integrated liquid water path
+    !---> yhc 2024-04-11
 !
 !-----------------------------------------------------------------------
 !
@@ -1233,6 +1245,26 @@ end subroutine diag_conv_tend_ini
        call vertinterp(ncol, pcols, pver, state%pmid, 1000._r8, state%t, p_surf)
        call outfld('T010           ', p_surf, pcols, lchnk )
     end if
+
+    !<--- yhc 2024-04-11
+    do k=1,pver
+      do i = 1,ncol
+        gicewp(i,k) = state%q(i,k,3)*state%pdel(i,k)/gravit  ! Grid box ice water path at each layer.
+        gliqwp(i,k) = state%q(i,k,2)*state%pdel(i,k)/gravit  ! Grid box liquid water path at each layer.
+      enddo
+    enddo
+
+    tgicewp(:ncol) = 0._r8
+    tgliqwp(:ncol) = 0._r8
+
+    do k=1,pver
+       tgicewp(:ncol)  = tgicewp(:ncol) + gicewp(:ncol,k)   ! vertical integral of ice water path
+       tgliqwp(:ncol)  = tgliqwp(:ncol) + gliqwp(:ncol,k)   ! vertical integral of liquid water path
+    end do
+
+    call outfld('TGCLDIWP_qi', tgicewp, pcols, lchnk )
+    call outfld('TGCLDLWP_ql', tgliqwp, pcols, lchnk )
+    !---> yhc 2024-04-11
 
 
   !---------------------------------------------------------
