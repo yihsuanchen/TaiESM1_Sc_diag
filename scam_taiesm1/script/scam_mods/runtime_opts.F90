@@ -492,6 +492,12 @@ contains
 
 ! 
 !-----------------------------------------------------------------------
+
+!<--- yhc 2024-03-04, set iradlw and iradsw to 1
+iradsw = 1
+iradlw = 1
+!---> yhc 2024-03-04, set iradlw and iradsw to 1
+
   if (present(nlfilename_in)) then
      nlfilename = nlfilename_in
   end if
@@ -526,6 +532,11 @@ contains
       iradae_out      = iradae,     &
       irad_always_out = irad_always, &
       spectralflux_out = spectralflux )
+
+!<--- yhc 2024-03-04, set iradlw and iradsw to 1
+iradsw = 1
+iradlw = 1
+!---> yhc 2024-03-04, set iradlw and iradsw to 1
 
 #if (defined WACCM_PHYS)
    ! iondrag / efield
@@ -872,7 +883,6 @@ contains
 !
       write(iulog,9108) nlvdry
 9108 format('Lowest level for dry adiabatic adjust (NLVDRY)',i10)
-
 
       call radiation_printopts()
 
