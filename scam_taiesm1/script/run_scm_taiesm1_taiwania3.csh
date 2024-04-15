@@ -55,8 +55,8 @@ module load compiler/intel/2020u4 netcdf-4.8.0-intel2020
 #  set environment variables on Taiwania 3
 # -------------------------------------------------------------------------
 
-#set CAM_ROOT  = /home/j07hsu00/taiesm/ver170803   # TaiESM1 codes
-set CAM_ROOT  = /work/yihsuan123/taiesm_ver170803_yhcTEST  # test TaiESM1 codes
+#set CAM_ROOT  = /home/j07hsu00/taiesm/ver170803   # original TaiESM1 codes
+set CAM_ROOT  = /work/yihsuan123/taiesm_ver170803  # yhc's TaiESM1 codes
 set CSMDATA = /home/j07hsu00/taiesm/inputdata
 setenv INC_NETCDF ${NETCDF}/include
 setenv LIB_NETCDF ${NETCDF}/lib
@@ -67,9 +67,11 @@ setenv LIB_NETCDF ${NETCDF}/lib
 
 # temporary variable
 set temp=`date +%m%d%H%M%S`
+set date_now=`date +%Y%m%d_%H%M`
 
 #--- set case
-set exp_name = "qq04-scam_test"
+#set exp_name = "qq04-scam_test"
+set exp_name = "scm_taiesm1"
 
 #--- available iopname: arm95 arm97 gateIII mpace sparticus togaII twp06, according to $CAM_ROOT/models/atm/cam/bld/build-namelist.
 #                       the build-namelist -use_case scam_${iopname} will fail if not these cases.
@@ -77,17 +79,36 @@ set exp_name = "qq04-scam_test"
 #                       These paramters should be able to found in CESM2 SCAM.
 #set iopname = 'arm95'
 #set iopname = 'twp06'
-set iopname = 'dycomsrf01'
+#set iopname = 'dycomsrf01'
+set iopname = 'dycomsrf02'
 
-set phys = "cam5"
-#set phys = "taiphy"
+#set phys = "cam5"
+set phys = "taiphy"
 
-set CASE = ${exp_name}.${iopname}.${phys}.${temp}
+set surf_flux = "psflx"  # prescribed surface sensible and latent heat fluxes
+#set surf_flux = "isflx"  # interactive surface sensible and latent heat fluxes
+
+#set CASE = ${exp_name}.${iopname}.${phys}.${temp}
+set CASE = ${exp_name}.${iopname}.${surf_flux}.${temp}
+
+#--- set the folder that contains modifed codes
+set SCAM_MODS = /home/yihsuan123/research/TaiESM1_Sc_diag/scam_taiesm1/script/scam_mods   # put the modifed files in this folder
+
+#--- check whether scm_iop_srf_prop is supported
+if ($surf_flux == "psflx") then
+  set text_srf = 'scm_iop_srf_prop= .true.'
+
+else if ($surf_flux == "isflx") then
+  set text_srf = 'scm_iop_srf_prop= .false.'
+
+else
+  echo "ERROR: surface flux option [$surf_flux] is not supported."
+  exit 1
+
+endif
 
 #--- set folders
-set SCAM_MODS = /home/yihsuan123/research/TaiESM1_Sc_diag/scam_taiesm1/script/scam_mods   # put the modifed files in this folder
-                                                                                          # as of 2023/11/28, a modified cam_history.F90 is in the folder. Search "yhc" to see the modifications.
-set WRKDIR = /work/yihsuan123/${exp_name}/
+set WRKDIR = /work/yihsuan123/taiesm_scm/${exp_name}/
 set BLDDIR = $WRKDIR/$CASE/bld
 set RUNDIR = $WRKDIR/$CASE/run
 mkdir -p $BLDDIR || exit 1
@@ -95,12 +116,13 @@ mkdir -p $RUNDIR || exit 1
 
 #--- back up this script in $BLDDIR
 set this_script = "$0"
-set script_name = "zz-run_scam.csh"
+set script_name = "zz-run_scam.csh.$date_now"
 cp $this_script $BLDDIR/$script_name || exit 1
 
 #--- not use sbatch
 #set this_script = "`pwd`/$0"
 #cp $this_script $BLDDIR || exit 1
+
 
 # -------------------------------------------------------------------------
 # *** copy from the SCAM original script. May need to modify it if using TaiESM physics ***
@@ -113,9 +135,6 @@ cp $this_script $BLDDIR/$script_name || exit 1
 if ($iopname == 'arm95' ||$iopname == 'arm97' ||$iopname == 'mpace' ||$iopname == 'twp06' ||$iopname == 'sparticus' ||$iopname == 'togaII' ||$iopname == 'gateIII' ||$iopname == 'IOPCASE') then
   set aero_mode = 'trop_mam3'
 
-else if ($iopname == 'dycomsrf01') then
-  set aero_mode = 'trop_mam3'
-
 else
   set aero_mode = 'none'
 endif
@@ -126,7 +145,6 @@ endif
 cd $BLDDIR || exit 1
 
 if ($phys == 'taiphy') then
-  #$CAM_ROOT/models/atm/cam/bld/configure -s -chem $aero_mode -dyn eul -res 64x128 -nospmd -nosmp -scam -ocn dom -comp_intf mct -taiphy -debug -fc ifort -cc icc -fc_type intel -usr_src $SCAM_MODS \
   $CAM_ROOT/models/atm/cam/bld/configure -s -dyn eul -res 64x128 -nospmd -nosmp -scam -ocn dom -comp_intf mct -taiphy -debug -fc ifort -cc icc -fc_type intel -usr_src $SCAM_MODS \
     || echo "ERROR: Configure failed." && exit 1   # when using taiphy, don't need to specify -chem $aero_mode
 else
@@ -158,7 +176,35 @@ if (! -f $scam_iop_xml) then
 endif
 
 #--- create namelist for respective iop
-if ($iopname == 'twp06') then
+
+#--- dycomsrf01 and dycomsrf02 namelist
+if ($iopname == 'dycomsrf01') then
+  set iopfile = "/work/opt/ohpc/pkg/rcec/model/taiesm/inputdata/atm/cam/scam/iop/DYCOMSrf01_4day_4scam.nc"
+else if ($iopname == 'dycomsrf02') then
+  set iopfile = "/work/opt/ohpc/pkg/rcec/model/taiesm/inputdata/atm/cam/scam/iop/DYCOMSrf02_48hr_4scam.nc"
+endif
+
+if ($iopname == 'dycomsrf01' || $iopname == 'dycomsrf02') then
+
+cat <<EOF >! tmp_namelistfile
+&camexp 
+    history_budget       = .true.,
+    nhtfrq               = 1, 
+    print_energy_errors=.true., 
+    fincl1 = "TTEND_TOT:A","DTCORE:A","PTTEND:A","ZMDT:A","EVAPTZM:A","FZSNTZM:A","EVSNTZM:A","ZMMTT:A","CMFDT:A","DPDLFT:A","SHDLFT:A", "MACPDT:A","MPDT:A","QRL:A","QRS:A","DTV:A","TTGWORO:A", "PTEQ:A","ZMDQ:A","EVAPQZM:A","CMFDQ:A","MACPDQ:A","MPDQ:A","VD01:A", "PTECLDLIQ:A","ZMDLIQ:A","CMFDLIQ:A","MACPDLIQ:A","MPDLIQ:A","VDCLDLIQ:A", "PTECLDICE:A","ZMDICE:A","CMFDICE:A","MACPDICE:A","MPDICE:A","VDCLDICE:A", "DPDLFLIQ:A","DPDLFICE:A","SHDLFLIQ:A","SHDLFICE:A","DPDLFT:A","SHDLFT:A","QVTEND_TOT:A","QLTEND_TOT:A","QITEND_TOT:A","DQVCORE:A","DQLCORE:A","DQICORE:A",'TGCLDLWP_ql:A', 'TGCLDIWP_qi:A'
+/
+
+&cam_inparm
+    iopfile = '${iopfile}',
+    ${text_srf}
+    ncdata = '/home/j07hsu00/taiesm/inputdata/atm/cam/inic/gaus/cami_0000-01-01_64x128_L30_c090102.nc',
+    iradsw = 1,
+    iradlw = 1
+/
+EOF
+
+#--- twp06 namelist
+else if ($iopname == 'twp06') then
 
 cat <<EOF >! tmp_namelistfile
 &camexp 
@@ -175,8 +221,6 @@ cat <<EOF >! tmp_namelistfile
     stop_option          = 'nsteps'
 /
 
-fincl1 = "TTEND_TOT:A","DTCORE:A","PTTEND:A","ZMDT:A","EVAPTZM:A","FZSNTZM:A","EVSNTZM:A","ZMMTT:A","CMFDT:A","DPDLFT:A","SHDLFT:A", "MACPDT:A","MPDT:A","QRL:A","QRS:A","DTV:A","TTGWORO:A", "PTEQ:A","ZMDQ:A","EVAPQZM:A","CMFDQ:A","MACPDQ:A","MPDQ:A","VD01:A", "PTECLDLIQ:A","ZMDCLDLIQ:A","CMFDCLDLIQ:A","MACPDCLDLIQ:A","MPDCLDLIQ:A","VDCLDLIQ:A", "PTECLDICE:A","ZMDCLDICE:A","CMFDCLDICE:A","MACPDCLDICE:A","MPDCLDICE:A","VDCLDICE:A", "DPDLFLIQ:A","DPDLFICE:A","SHDLFLIQ:A","SHDLFICE:A","DPDLFT:A","SHDLFT:A","QVTEND_TOT:A","QLTEND_TOT:A","QITEND_TOT:A","DQVCORE:A","DQLCORE:A","DQICORE:A"
-
 EOF
 
 #--- default namelist
@@ -188,6 +232,7 @@ cat <<EOF >! tmp_namelistfile
     nhtfrq               = 1, 
     print_energy_errors=.true., 
 /
+
 EOF
   #echo "ERROR: iopname [$iopname] namelist is not supported in this script" && exit 1
 
@@ -196,7 +241,6 @@ endif
 #--- use build-namelist to create namelists
 $CAM_ROOT/models/atm/cam/bld/build-namelist -s -infile tmp_namelistfile -use_case scam_${iopname} -csmdata $CSMDATA \
     || echo "build-namelist failed" && exit 1
-
 
 # --------------------------
 # Run SCAM
