@@ -52,6 +52,7 @@ integer, public, parameter :: N_DIAG = 10
 character(len=cs1), public :: iceopticsfile, liqopticsfile
 character(len=32),  public :: icecldoptics,liqcldoptics
 logical,            public :: oldcldoptics = .false.
+logical,            public :: do_no_solar = .false.   ! yhc 2024-04-15
 
 ! Private module data
 
@@ -243,6 +244,7 @@ subroutine rad_cnst_readnl(nlfile)
                           liqopticsfile, &
                           icecldoptics,  &
                           liqcldoptics,  &
+                          do_no_solar,   &  ! yhc 2024-04-15
                           oldcldoptics
 
    !-----------------------------------------------------------------------------
@@ -280,6 +282,7 @@ subroutine rad_cnst_readnl(nlfile)
    call mpibcast (liqcldoptics,  len(liqcldoptics),                mpichar, 0, mpicom)
    call mpibcast (icecldoptics,  len(icecldoptics),                mpichar, 0, mpicom)
    call mpibcast (oldcldoptics,  1,                                mpilog , 0, mpicom)
+   call mpibcast (do_no_solar,   1,                                mpilog , 0, mpicom)   ! yhc 2024-04-15
 #endif
 
    ! Parse the namelist input strings
