@@ -610,6 +610,7 @@ end function radiation_nextsw_cday
     use radlw,            only: rad_rrtmg_lw
     use rad_constituents, only: rad_cnst_get_gas, rad_cnst_out, oldcldoptics, &
                                 liqcldoptics, icecldoptics
+                                !liqcldoptics, icecldoptics, do_no_solar  ! yhc 2024-04-15
     use aer_rad_props,    only: aer_rad_props_sw, aer_rad_props_lw
     use interpolate_data, only: vertinterp
     use cloud_rad_props,  only: get_ice_optics_sw, get_liquid_optics_sw, liquid_cloud_get_rad_props_lw, &
@@ -793,6 +794,10 @@ end function radiation_nextsw_cday
     type(rrtmg_state_t), pointer :: r_state ! contains the atm concentratiosn in layers needed for RRTMG
 
     character(*), parameter :: name = 'radiation_tend'
+
+    logical :: do_no_solar = .false.   ! yhc 2024-04-15. turn off solar radiation in rrtmg_sw.
+                                       ! It is possible to set do_no_solar as a namelist variable in rad_cnst_nl,
+                                       ! but it needs to modify namelist scripts. Hard coded do_no_solar here.
 !----------------------------------------------------------------------
 
     lchnk = state%lchnk
@@ -995,6 +1000,12 @@ end function radiation_nextsw_cday
        if (dosw) then
 
           call get_variability(sfac)
+
+          !<---
+          if (do_no_solar) then
+            sfac=0.
+          endif
+          !--->
 
           ! Get the active climate/diagnostic shortwave calculations
           call rad_cnst_get_call_list(active_calls)
