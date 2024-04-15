@@ -92,7 +92,11 @@ set surf_flux = "psflx"  # prescribed surface sensible and latent heat fluxes
 set CASE = ${exp_name}.${iopname}.${surf_flux}.${temp}
 
 #--- set the folder that contains modifed codes
-set SCAM_MODS = /home/yihsuan123/research/TaiESM1_Sc_diag/scam_taiesm1/script/scam_mods   # put the modifed files in this folder
+#set SCAM_MODS = /home/yihsuan123/research/TaiESM1_Sc_diag/scam_taiesm1/script/scam_mods         # put the modifed files in this folder
+set SCAM_MODS = /home/yihsuan123/research/TaiESM1_Sc_diag/scam_taiesm1/script/scam_mods.dycoms   # scam_mods.dycoms
+                                                                                                 #   - no solar radiation (do_no_solar in radiation.F90)
+                                                                                                 #   - radiation scheme is called at every time step 
+                                                                                                 #     (iradlw=1=iradsw in runtime_opts.F90) 
 
 #--- check whether scm_iop_srf_prop is supported
 if ($surf_flux == "psflx") then
