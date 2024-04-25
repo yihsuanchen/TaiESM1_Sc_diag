@@ -188,6 +188,14 @@ else if ($iopname == 'dycomsrf02') then
   set iopfile = "/work/opt/ohpc/pkg/rcec/model/taiesm/inputdata/atm/cam/scam/iop/DYCOMSrf02_48hr_4scam.nc"
 endif
 
+if ($surf_flux == "psflx") then
+  set text_srf = 'scm_iop_srf_prop= .true.'
+else if ($surf_flux == "isflx") then
+  set text_srf = 'scm_iop_srf_prop= .false.'
+else
+  set text_srf =""
+endif
+
 if ($iopname == 'dycomsrf01' || $iopname == 'dycomsrf02') then
 
 cat <<EOF >! tmp_namelistfile
