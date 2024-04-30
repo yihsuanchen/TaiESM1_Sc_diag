@@ -439,6 +439,8 @@ contains
    character(len=fieldname_lenp2) fwrtpr5(pflds)
    character(len=fieldname_lenp2) fwrtpr6(pflds)
 
+   logical, parameter :: do_irad_every_time_step = .true.  ! yhc
+
 !
 ! Define the cam_inparm namelist
 ! ***NOTE*** If a namelist option is not described in the CAM Users Guide,
@@ -494,8 +496,10 @@ contains
 !-----------------------------------------------------------------------
 
 !<--- yhc 2024-03-04, set iradlw and iradsw to 1
-iradsw = 1
-iradlw = 1
+if (do_irad_every_time_step) then
+  iradsw = 1
+  iradlw = 1
+end if
 !---> yhc 2024-03-04, set iradlw and iradsw to 1
 
   if (present(nlfilename_in)) then
@@ -534,8 +538,10 @@ iradlw = 1
       spectralflux_out = spectralflux )
 
 !<--- yhc 2024-03-04, set iradlw and iradsw to 1
-iradsw = 1
-iradlw = 1
+if (do_irad_every_time_step) then
+  iradsw = 1
+  iradlw = 1
+end if
 !---> yhc 2024-03-04, set iradlw and iradsw to 1
 
 #if (defined WACCM_PHYS)
