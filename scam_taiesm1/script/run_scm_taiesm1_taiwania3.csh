@@ -44,12 +44,24 @@ set echo
 # module purge
 # module load cmake/3.15.4 compiler/intel/2020u4 IntelMPI/2020 netcdf-4.8.0-NC4-intel2020-impi pnetcdf-1.8.1-intel2020-impi
 # $CAM_ROOT/models/atm/cam/bld/configure -s -chem $aero_mode -dyn eul -res 64x128 -nospmd -nosmp -scam -ocn dom -comp_intf mct -phys cam5 -debug -fc ifort -v
+#
+#
+# ---- modules used before Taiwania 3 was upgraded in April 2024
+# source /opt/ohpc/admin/lmod/8.1.18/init/csh
+# setenv MODULEPATH /home/yhtseng00/modules:/opt/ohpc/Taiwania3/modulefiles:/opt/ohpc/Taiwania3/pkg/lmod/comp/intel/2020:/opt/ohpc/pub/modulefiles
+# module purge
+# module load compiler/intel/2020u4 netcdf-4.8.0-intel2020
 #-------------------------------------------------------------------------
-source /opt/ohpc/admin/lmod/8.1.18/init/csh
-setenv MODULEPATH /home/yhtseng00/modules:/opt/ohpc/Taiwania3/modulefiles:/opt/ohpc/Taiwania3/pkg/lmod/comp/intel/2020:/opt/ohpc/pub/modulefiles
 
+#--- modules used after Taiwania 3 was upgraded in April 2024
+#    Add this into .barhrc: export MODULEPATH=$MODULEPATH:/opt/ohpc/pkg/rcec/opt/modulefiles
+source /usr/share/lmod/lmod/init/csh
 module purge
-module load compiler/intel/2020u4 netcdf-4.8.0-intel2020
+module use /opt/ohpc/pkg/rcec/opt/modulefiles
+module load rcec/stack-intel
+set NETCDF = /home/j07hsu00/opt/netcdf-4.9.2_intel-2021
+setenv INC_NETCDF ${NETCDF}/include
+setenv LIB_NETCDF ${NETCDF}/lib
 
 # -------------------------------------------------------------------------
 #  set environment variables on Taiwania 3
@@ -203,7 +215,7 @@ cat <<EOF >! tmp_namelistfile
     history_budget       = .true.,
     nhtfrq               = 1, 
     print_energy_errors=.true., 
-    fincl1 = "TTEND_TOT:A","DTCORE:A","PTTEND:A","ZMDT:A","EVAPTZM:A","FZSNTZM:A","EVSNTZM:A","ZMMTT:A","CMFDT:A","DPDLFT:A","SHDLFT:A", "MACPDT:A","MPDT:A","QRL:A","QRS:A","DTV:A","TTGWORO:A", "PTEQ:A","ZMDQ:A","EVAPQZM:A","CMFDQ:A","MACPDQ:A","MPDQ:A","VD01:A", "PTECLDLIQ:A","ZMDLIQ:A","CMFDLIQ:A","MACPDLIQ:A","MPDLIQ:A","VDCLDLIQ:A", "PTECLDICE:A","ZMDICE:A","CMFDICE:A","MACPDICE:A","MPDICE:A","VDCLDICE:A", "DPDLFLIQ:A","DPDLFICE:A","SHDLFLIQ:A","SHDLFICE:A","DPDLFT:A","SHDLFT:A","QVTEND_TOT:A","QLTEND_TOT:A","QITEND_TOT:A","DQVCORE:A","DQLCORE:A","DQICORE:A",'TGCLDLWP_ql:A', 'TGCLDIWP_qi:A'
+    fincl1 = "TTEND_TOT:A","DTCORE:A","PTTEND:A","ZMDT:A","EVAPTZM:A","FZSNTZM:A","EVSNTZM:A","ZMMTT:A","CMFDT:A","DPDLFT:A","SHDLFT:A", "MACPDT:A","MPDT:A","QRL:A","QRS:A","DTV:A","TTGWORO:A", "PTEQ:A","ZMDQ:A","EVAPQZM:A","CMFDQ:A","MACPDQ:A","MPDQ:A","VD01:A", "PTECLDLIQ:A","ZMDLIQ:A","CMFDLIQ:A","MACPDLIQ:A","MPDLIQ:A","VDCLDLIQ:A", "PTECLDICE:A","ZMDICE:A","CMFDICE:A","MACPDICE:A","MPDICE:A","VDCLDICE:A", "DPDLFLIQ:A","DPDLFICE:A","SHDLFLIQ:A","SHDLFICE:A","DPDLFT:A","SHDLFT:A","QVTEND_TOT:A","QLTEND_TOT:A","QITEND_TOT:A","DQVCORE:A","DQLCORE:A","DQICORE:A"
 /
 
 &cam_inparm
