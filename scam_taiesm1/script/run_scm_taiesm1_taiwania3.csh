@@ -51,6 +51,8 @@ set echo
 # setenv MODULEPATH /home/yhtseng00/modules:/opt/ohpc/Taiwania3/modulefiles:/opt/ohpc/Taiwania3/pkg/lmod/comp/intel/2020:/opt/ohpc/pub/modulefiles
 # module purge
 # module load compiler/intel/2020u4 netcdf-4.8.0-intel2020
+# setenv INC_NETCDF ${NETCDF}/include
+# setenv LIB_NETCDF ${NETCDF}/lib
 #-------------------------------------------------------------------------
 
 #--- modules used after Taiwania 3 was upgraded in April 2024
@@ -70,8 +72,6 @@ setenv LIB_NETCDF ${NETCDF}/lib
 #set CAM_ROOT  = /home/j07hsu00/taiesm/ver170803   # original TaiESM1 codes
 set CAM_ROOT  = /work/yihsuan123/taiesm_ver170803  # yhc's TaiESM1 codes
 set CSMDATA = /home/j07hsu00/taiesm/inputdata
-setenv INC_NETCDF ${NETCDF}/include
-setenv LIB_NETCDF ${NETCDF}/lib
 
 # -------------------------------------------------------------------------
 # setup for the SCAM run
@@ -97,8 +97,8 @@ set iopname = 'dycomsrf02'
 #set phys = "cam5"
 set phys = "taiphy"
 
-set surf_flux = "psflx"  # prescribed surface sensible and latent heat fluxes
-#set surf_flux = "isflx"  # interactive surface sensible and latent heat fluxes
+#set surf_flux = "psflx"  # prescribed surface sensible and latent heat fluxes
+set surf_flux = "isflx"  # interactive surface sensible and latent heat fluxes
 
 #set CASE = ${exp_name}.${iopname}.${phys}.${temp}
 set CASE = ${exp_name}.${iopname}.${surf_flux}.${temp}
@@ -106,9 +106,9 @@ set CASE = ${exp_name}.${iopname}.${surf_flux}.${temp}
 #--- set the folder that contains modifed codes
 #set SCAM_MODS = /home/yihsuan123/research/TaiESM1_Sc_diag/scam_taiesm1/script/scam_mods         # put the modifed files in this folder
 set SCAM_MODS = /home/yihsuan123/research/TaiESM1_Sc_diag/scam_taiesm1/script/scam_mods.dycoms   # scam_mods.dycoms
-                                                                                                 #   - no solar radiation (do_no_solar in radiation.F90)
+                                                                                                 #   - no solar radiation (do_no_solar=True in radiation.F90)
                                                                                                  #   - radiation scheme is called at every time step 
-                                                                                                 #     (iradlw=1=iradsw in runtime_opts.F90) 
+                                                                                                 #     (do_irad_every_time_step=True in runtime_opts.F90) 
 
 #--- check whether scm_iop_srf_prop is supported
 if ($surf_flux == "psflx") then
@@ -195,7 +195,8 @@ endif
 
 #--- dycomsrf01 and dycomsrf02 namelist
 if ($iopname == 'dycomsrf01') then
-  set iopfile = "/work/opt/ohpc/pkg/rcec/model/taiesm/inputdata/atm/cam/scam/iop/DYCOMSrf01_4day_4scam.nc"
+  #set iopfile = "/work/opt/ohpc/pkg/rcec/model/taiesm/inputdata/atm/cam/scam/iop/DYCOMSrf01_4day_4scam.nc"   # origional IOP, supersaturation is allowed.
+  set iopfile = "/home/yihsuan123/research/TaiESM1_Sc_diag/scam_taiesm1/iop_modified/DYCOMSrf01_4day_4scam_Recompute_Tqvql_inML.nc"  # remove supersaturation
 else if ($iopname == 'dycomsrf02') then
   set iopfile = "/work/opt/ohpc/pkg/rcec/model/taiesm/inputdata/atm/cam/scam/iop/DYCOMSrf02_48hr_4scam.nc"
 endif
