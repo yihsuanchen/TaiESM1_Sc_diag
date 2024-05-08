@@ -130,15 +130,16 @@ set RUNDIR = $WRKDIR/$CASE/run
 mkdir -p $BLDDIR || exit 1
 mkdir -p $RUNDIR || exit 1
 
-#--- back up this script in $BLDDIR
+#--- back up this script and scam_mods in $BLDDIR
 set this_script = "$0"
 set script_name = "zz-run_scam.csh.$date_now"
 cp $this_script $BLDDIR/$script_name || exit 1
 
+cp -r $SCAM_MODS "$BLDDIR/zz-scam_mods.$date_now" || exit 1
+
 #--- not use sbatch
 #set this_script = "`pwd`/$0"
 #cp $this_script $BLDDIR || exit 1
-
 
 # -------------------------------------------------------------------------
 # *** copy from the SCAM original script. May need to modify it if using TaiESM physics ***
