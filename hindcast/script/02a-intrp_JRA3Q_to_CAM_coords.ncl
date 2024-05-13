@@ -28,18 +28,18 @@ begin
 ;------------------
 
     ;--- whether to write out the interpolated fields into new files
-    do_writeout = False
-    ;do_writeout = True
+    ;do_writeout = False
+    do_writeout = True
 
     ;--- input arguments
     date = "2001060100" ;YYYYMMDDHH
     datapath = "~/data/data.TaiESM1_hindcast/data.July2001_JRA3Q.hindcast/"
-    filename_prs = datapath+"anl_p125_spfh."+date
+    filename_prs_ref = datapath+"anl_p125_[var]."+date
     filename_sfc = datapath+"anl_surf125."+date
     filename_cami = datapath+"cami-snap_0000-01-01_0.9x1.25_L30_c100618.nc"
     filename_out = "zz1.nc"   ; the file content is same as filename_cami
 
-    print("Input JRA3Q PRS file: "+filename_prs)
+    print("Input JRA3Q PRS file: "+filename_prs_ref)
     print("Input JRA3Q SFC file: "+filename_sfc)
     print("Output ref file    : "+filename_cami)
     print("Output file        : "+filename_out)
@@ -192,8 +192,8 @@ begin
         v_intrp@units     = "m/s"
       end if
 
-      ;printVarSummary(var_prs)
-      ;printVarSummary(var_intrp)
+      printVarSummary(var_prs)
+      printVarSummary(var_intrp)
       delete(var_intrp)
       delete(lon_out)
       delete(lat_out)
@@ -201,9 +201,7 @@ begin
       delete(file_prs)
       delete(var_prs)
     end do ; end loop of vv
-   
-exit
- 
+    
 ;-------------
 ; write out
 ;-------------
@@ -215,7 +213,7 @@ exit
 
   if (do_writeout) then
     ; create file_out
-    comd = "cp -i "+outfile_ref+" "+filename_out+" && echo create_file_out || exit 1"
+    comd = "cp -i "+filename_cami+" "+filename_out+" && echo create_file_out || exit 1"
     ;print(comd)
     system(comd)
 
@@ -224,18 +222,18 @@ exit
     file_out = addfile(filename_out, "w")
 
     ;--- write variables
-    file_out->T  = (/t_intrp/)
-    file_out->Q  = (/q_intrp/)
-    file_out->US = (/u_intrp/)
-    file_out->VS = (/v_intrp/)
-    file_out->PS = (/psfc_intrp_pa/)
+    file_out->T (0,:,:,:) = (/t_intrp/)
+    file_out->Q (0,:,:,:) = (/q_intrp/)
+    file_out->US(0,:,:,:) = (/u_intrp/)
+    file_out->VS(0,:,:,:) = (/v_intrp/)
+    file_out->PS(0,:,:)   = (/psfc_intrp_pa/)
 
     ;--- add file attributes
     current_time = systemfunc("date +%Y%m%d_%H:%M:%S")
     file_out@file_modification = "replace T,Q,US,VS,PS with JMA3Q data at "+current_time
-    file_out@Input_JMA3Q_PRS_file = filename_prs
+    file_out@Input_JMA3Q_PRS_file = filename_prs_ref
     file_out@Input_JMA3Q_SFC_file = filename_sfc
-    file_out@Output_ref_file = outfile_ref
+    file_out@Output_ref_file = filename_cami
 
   end if  ; end if of do_writeout
 
