@@ -49,7 +49,7 @@ begin
 ;--------------------------------
 
     ;--- open files
-    file_prs  = addfile(filename_prs,"r")
+    ;file_prs  = addfile(filename_prs,"r")
     file_sfc  = addfile(filename_sfc,"r")
     file_cami = addfile(filename_cami,"r")
 
@@ -66,6 +66,7 @@ begin
     slat_cami = file_cami->slat
     hyam = file_cami->hyam                             ; get a coefficiants
     hybm = file_cami->hybm                              ; get b coefficiants
+    var4d_cami = file_cami->T
     P0mb = 1000.
 
 ;------------------------------------------------------------
@@ -85,9 +86,10 @@ begin
     opt = True
     opt@critpc = 50
 
-    ;--- interpolat JMA3Q surface pressure on cami lat/lon grids
+    ;--- interpolat JMA3Q surface pressure on cami lat/lon grids. Note that lat_prs is [90,-90] and lat_cami is [-90,90].
     ;psfc_intrp  = area_hi2lores (pslon,pslat(::-1), psfc(:,::-1,:) , True, 1,  lon_cami, lat_cami, opt  )  ; (ntim,49,120)
-    psfc_intrp  = area_hi2lores (pslon, pslat, psfc(:,:) , True, 1,  lon_cami, lat_cami, opt  )  ; (ntim,49,120)
+    ;psfc_intrp  = area_hi2lores (pslon, pslat, psfc(:,:) , True, 1,  lon_cami, lat_cami, opt  )  ; (ntim,49,120)
+    psfc_intrp  = area_hi2lores (pslon, pslat(::-1), psfc(::-1,:) , True, 1,  lon_cami, lat_cami, opt  )  ; (ntim,49,120)
 
     psfc_intrp_pa = psfc_intrp * 100.
     psfc_intrp_pa@units = "Pa"
@@ -102,21 +104,32 @@ begin
 ; Read JMA3Q variables on pressure levels and interpolate it on cami lat/lon grids
 ;------------------------------------------------------------
 
-    varname_prs = (/"t","q","u","v"/)
+    filename_prs_var = (/"tmp","spfh","ugrd","vgrd"/)  ; variable appearing in the file names
+    varname_prs      = (/"TMP_P0_L100_GLL0","SPFH_P0_L100_GLL0","UGRD_P0_L100_GLL0","VGRD_P0_L100_GLL0"/)  ; variable names in the data
+
     nvar = dimsizes(varname_prs)
 
     ;--- read JMA3Q pressure levels
-    plev_prs = file_prs->level
-    lon_prs = file_prs->longitude
-    lat_prs = file_prs->latitude
 
     do vv=0, nvar-1
     ;do vv=0,0
 
-      ;--- read a variable
+      ;--- read file
+      filename_var = filename_prs_var(vv)
       varname = varname_prs(vv)
+
+      filename_prs = datapath+"anl_p125_"+filename_var+"."+date
+      file_prs  = addfile(filename_prs,"r")
+
+      ;--- read a variable
       print("  process ["+varname+"]...")
-      var_prs = short2flt(file_prs->$varname$)
+      var_prs = file_prs->$varname$
+
+      plev_prs = file_prs->lv_ISBL0
+        plev_prs = plev_prs/100.
+        plev_prs@units = "hPa"
+      lon_prs = file_prs->lon_0
+      lat_prs = file_prs->lat_0
 
       ;print("aa1")
       ;ii=100
@@ -127,47 +140,53 @@ begin
       ;printVarSummary(var_prs)
       ;printVarSummary(psfc_intrp)
 
-      ;--- interpolate the variable on cam hybrid levels
+      ;--- interpolate the variable on cam hybrid levels. All pressure in hPa.
       var_hylev = pres2hybrid(plev_prs, psfc, P0mb, var_prs, hyam, hybm,4)
 
-      ;--- interpolate the variable on cam lat/lon grids
-      if (varname.eq."u") then   ; u_intrp(time, lev, slat, lon)
-        var_intrp = area_conserve_remap (lon_prs, lat_prs(::-1), var_hylev(:,:,::-1,:), lon_cami, slat_cami, False)
+      ;--- interpolate the variable on cam lat/lon grids. Note that lat_prs is [90,-90] and lat_cami is [-90,90].
+      if (varname.eq."UGRD_P0_L100_GLL0") then   ; u_intrp(time, lev, slat, lon)
+        var_intrp = area_conserve_remap (lon_prs, lat_prs(::-1), var_hylev(:,::-1,:), lon_cami, slat_cami, False)
         lat_out = slat_cami
         lon_out = lon_cami
 
-      elseif (varname.eq."v") then   ; v_intrp(time, lev, lat, slon)
-        var_intrp = area_conserve_remap (lon_prs, lat_prs(::-1), var_hylev(:,:,::-1,:), slon_cami, lat_cami, False)
+      elseif (varname.eq."VGRD_P0_L100_GLL0") then   ; v_intrp(time, lev, lat, slon)
+        var_intrp = area_conserve_remap (lon_prs, lat_prs(::-1), var_hylev(:,::-1,:), slon_cami, lat_cami, False)
         lat_out = lat_cami
         lon_out = slon_cami
       else
-        var_intrp = area_conserve_remap (lon_prs, lat_prs(::-1), var_hylev(:,:,::-1,:), lon_cami, lat_cami, False)
+        var_intrp = area_conserve_remap (lon_prs, lat_prs(::-1), var_hylev(:,::-1,:), lon_cami, lat_cami, False)
         lat_out = lat_cami
         lon_out = lon_cami
       end if
 
       ;--- set var_intrp coordinate
-      var_intrp!3    = "lon"
-      var_intrp!2    = "lat"
-      var_intrp!1    = "lev"
-      var_intrp!0    = "time"
+      ;var_intrp!3    = "lon"
+      ;var_intrp!2    = "lat"
+      ;var_intrp!1    = "lev"
+      ;var_intrp!0    = "time"
+      ;var_intrp&lat   = lat_out
+      ;var_intrp&lon   = lon_out    
+
+      var_intrp!2    = "lon"
+      var_intrp!1    = "lat"
+      var_intrp!0    = "lev"
       var_intrp&lat   = lat_out
       var_intrp&lon   = lon_out    
 
       ;--- set var_intrp long_name and units
-      if (varname.eq."t") then
+      if (varname.eq."TMP_P0_L100_GLL0") then
         t_intrp = var_intrp
         t_intrp@long_name = "Temperature"           ; assign attributes
         t_intrp@units     = "K"
-      elseif (varname.eq."q") then
+      elseif (varname.eq."SPFH_P0_L100_GLL0") then
         q_intrp = var_intrp
         q_intrp@long_name = "Specific humidity"           ; assign attributes
         q_intrp@units     = "kg/kg"
-      elseif (varname.eq."u") then
+      elseif (varname.eq."UGRD_P0_L100_GLL0") then
         u_intrp = var_intrp
         u_intrp@long_name = "Zonal wind, staggered"           ; assign attributes
         u_intrp@units     = "m/s"
-      elseif (varname.eq."v") then
+      elseif (varname.eq."VGRD_P0_L100_GLL0") then
         v_intrp = var_intrp
         v_intrp@long_name = "Meridional wind, staggered"           ; assign attributes
         v_intrp@units     = "m/s"
@@ -178,8 +197,13 @@ begin
       delete(var_intrp)
       delete(lon_out)
       delete(lat_out)
+
+      delete(file_prs)
+      delete(var_prs)
     end do ; end loop of vv
-    
+   
+exit
+ 
 ;-------------
 ; write out
 ;-------------
