@@ -32,8 +32,8 @@ CASENAME="hindcast03-taiesm1.F_2000_TAI.f09_f09"
 CASE="$WRKDIR/$CASENAME"
 
 #--- initial condition data for each hindcase run
-icdata_option="ERA5"
-#icdata_optio_option="JMA3Q"
+#icdata_option="ERA5"
+icdata_option="JRA3Q"
 
 icdata_path="/work/yihsuan123/data/data.TaiESM1_hindcast/data.July2001_${icdata_option}.hindcast/"
 icdata_filehead="cami-snap_0000-01-01_0.9x1.25_L30.${icdata_option}_ic."
@@ -96,7 +96,7 @@ while [ "$current_date" -le "$end_date" ]; do
   cd $CASE || exit 1  ## move to the CASE directory
 
   echo "Hindcast simulation start date: [$current_date]"
-  echo "                    ic data   : [$icdata]"
+  echo "                    ic data   : [$icdata_option]"
 
   #--- check whether previous job is still in queue
   job_in_queue=0
