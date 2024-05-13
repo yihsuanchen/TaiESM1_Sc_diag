@@ -25,7 +25,7 @@
 ###################
 
 ### ncl files ###
-nclfiles="02-intrp_ERA5_to_CAM_coords.ncl"
+nclfiles="02a-intrp_JRA3Q_to_CAM_coords.ncl"
 #nclfiles=(\
 #          ".ncl" \
 #          ".ncl" \
@@ -33,10 +33,10 @@ nclfiles="02-intrp_ERA5_to_CAM_coords.ncl"
 
 ### input variable names ###
 #vars_input=("infilename_noScat" "infilename_Scat" "infilename_ScatFIR" "plotname_step" "plotname_file" "varvars")
-vars_input=("filename_prs" "filename_sfc" "filename_out")
+vars_input=("date" "filename_out")
 
 ### group input variables, only support g01~g09 ###
-vars_group=("g01" "g01" "g01")
+vars_group=("g01" "g01")
 
 #*** set choice of each input variables ***
 function read_choices_input {
@@ -44,12 +44,10 @@ function read_choices_input {
 
   if [ $var_in == "lskjdflksjdlfkjsaldflajskdfl" ]; then
     choice_out=""
-  elif [ $var_in == "filename_prs" ]; then
-    choice_out="~/data/data.ERA5/ERA5_PRS.t_q_u_v.r1440x721.2001_07_01_00Z.nc"
-  elif [ $var_in == "filename_sfc" ]; then
-    choice_out="~/data/data.ERA5/ERA5_SFC.sp.r1440x721.2001_07_01_00Z.nc"
+  elif [ $var_in == "date" ]; then
+    choice_out=("2001070200" "2001070400")
   elif [ $var_in == "filename_out" ]; then
-    choice_out="zz1.nc"
+    choice_out=("zz1-2001070200.nc" "zz1-2001070400.nc")
   elif [ $var_in == "plotname_step" ]; then
     choice_out=("ANN" "DJF" "MAM" "JJA" "SON")
   elif [ $var_in == "plotname_file" ]; then
