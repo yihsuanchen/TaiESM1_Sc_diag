@@ -31,13 +31,15 @@ begin
     ;do_writeout = False
     do_writeout = True
 
-    ;--- input arguments
-    date = "2001060100" ;YYYYMMDDHH
+    ;--- input arguments from command line
+    ;date = "2001070100" ;YYYYMMDDHH
+    ;filename_out = "zz1-"+date+".nc"   ; the file content is same as filename_cami
+
+    ;--- data
     datapath = "~/data/data.TaiESM1_hindcast/data.July2001_JRA3Q.hindcast/"
-    filename_prs_ref = datapath+"anl_p125_[var]."+date
+    filename_prs_ref = datapath+"anl_p125_[spfh,tmp,ugrd,vgrd]."+date
     filename_sfc = datapath+"anl_surf125."+date
     filename_cami = datapath+"cami-snap_0000-01-01_0.9x1.25_L30_c100618.nc"
-    filename_out = "zz1-"+date+".nc"   ; the file content is same as filename_cami
 
     print("Input JRA3Q PRS file: "+filename_prs_ref)
     print("Input JRA3Q SFC file: "+filename_sfc)
@@ -96,7 +98,6 @@ begin
     ;       Because the horizontal resolution of JRA3Q (1.25 lat x 1.25 lon) is lower than TaiESM1 (0.9 lat x 1.25 lon), the NCL funtion linint2 is used to interpolate
 
     ;psfc_intrp  = area_hi2lores (pslon, pslat(::-1), psfc(::-1,:) , True, 1,  lon_cami, lat_cami, opt  )  ; (ntim,49,120)
-
     psfc_intrp = linint2 (pslon, pslat(::-1), psfc(::-1,:) , True, lon_cami, lat_cami, 0)
 
     psfc_intrp_pa = psfc_intrp * 100.
@@ -245,6 +246,8 @@ begin
     file_out@Input_JMA3Q_PRS_file = filename_prs_ref
     file_out@Input_JMA3Q_SFC_file = filename_sfc
     file_out@Output_ref_file = filename_cami
+    file_out@Convert_grib2nc_sfc = "ncl_convert2nc "+filename_sfc+".grib"
+    file_out@Convert_grib2nc_prs = "ncl_convert2nc "+filename_prs_ref+".grib"
 
   end if  ; end if of do_writeout
 
