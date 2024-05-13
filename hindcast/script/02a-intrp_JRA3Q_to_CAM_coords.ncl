@@ -37,7 +37,7 @@ begin
     filename_prs_ref = datapath+"anl_p125_[var]."+date
     filename_sfc = datapath+"anl_surf125."+date
     filename_cami = datapath+"cami-snap_0000-01-01_0.9x1.25_L30_c100618.nc"
-    filename_out = "zz1.nc"   ; the file content is same as filename_cami
+    filename_out = "zz1-"+date+".nc"   ; the file content is same as filename_cami
 
     print("Input JRA3Q PRS file: "+filename_prs_ref)
     print("Input JRA3Q SFC file: "+filename_sfc)
@@ -66,8 +66,14 @@ begin
     slat_cami = file_cami->slat
     hyam = file_cami->hyam                             ; get a coefficiants
     hybm = file_cami->hybm                              ; get b coefficiants
-    var4d_cami = file_cami->T
     P0mb = 1000.
+
+    ;--- Because the horizontal resolution of JRA3Q (1.25 lat x 1.25 lon) is lower than TaiESM1 (0.9 lat x 1.25 lon), 
+    ;    the NCL funtion linint2 is used to interpolate. linint2 does not do extrepolation and TaiESM1 lat is 90.000001 and -90.0000001, which is outside ot JRA3Q range [-90, 90].
+    ;    So, linint2 results in misssing values at -90 and 90. Change the max/min lat_cami to 90/-90 to avoid this problem.
+    nlat = dimsizes(lat_cami)
+      lat_cami(0) = -90.
+      lat_cami(nlat-1) = 90.
 
 ;------------------------------------------------------------
 ; Read JMA3Q surface pressure and interpolate it on cami lat/lon grids
@@ -84,21 +90,24 @@ begin
     pslon = file_sfc->lon_0
     pslat = file_sfc->lat_0
     opt = True
-    opt@critpc = 50
+    ;opt@critpc = 50
 
     ;--- interpolat JMA3Q surface pressure on cami lat/lon grids. Note that lat_prs is [90,-90] and lat_cami is [-90,90].
-    ;psfc_intrp  = area_hi2lores (pslon,pslat(::-1), psfc(:,::-1,:) , True, 1,  lon_cami, lat_cami, opt  )  ; (ntim,49,120)
-    ;psfc_intrp  = area_hi2lores (pslon, pslat, psfc(:,:) , True, 1,  lon_cami, lat_cami, opt  )  ; (ntim,49,120)
-    psfc_intrp  = area_hi2lores (pslon, pslat(::-1), psfc(::-1,:) , True, 1,  lon_cami, lat_cami, opt  )  ; (ntim,49,120)
+    ;       Because the horizontal resolution of JRA3Q (1.25 lat x 1.25 lon) is lower than TaiESM1 (0.9 lat x 1.25 lon), the NCL funtion linint2 is used to interpolate
+
+    ;psfc_intrp  = area_hi2lores (pslon, pslat(::-1), psfc(::-1,:) , True, 1,  lon_cami, lat_cami, opt  )  ; (ntim,49,120)
+
+    psfc_intrp = linint2 (pslon, pslat(::-1), psfc(::-1,:) , True, lon_cami, lat_cami, 0)
 
     psfc_intrp_pa = psfc_intrp * 100.
     psfc_intrp_pa@units = "Pa"
 
     ;printVarSummary(psfc)
     ;printVarSummary(psfc_intrp)
+    ;printVarSummary(psfc_intrp_linint2)
 
-    ;var_tmp = file_sfc->$varname_sp$
-    ;print("float: "+psfc+" , short: "+var_tmp)
+;print(psfc)
+;print(psfc_intrp)
 
 ;------------------------------------------------------------
 ; Read JMA3Q variables on pressure levels and interpolate it on cami lat/lon grids
@@ -192,8 +201,8 @@ begin
         v_intrp@units     = "m/s"
       end if
 
-      printVarSummary(var_prs)
-      printVarSummary(var_intrp)
+      ;printVarSummary(var_prs)
+      ;printVarSummary(var_intrp)
       delete(var_intrp)
       delete(lon_out)
       delete(lat_out)
@@ -217,7 +226,9 @@ begin
     ;print(comd)
     system(comd)
 
-    print("  write out variables...")
+    ;msg = "  write out variables to ["+filename_out+"] ..."
+    ;print(msg)
+    print("  write out variables to ["+filename_out+"] ...")
 
     file_out = addfile(filename_out, "w")
 
