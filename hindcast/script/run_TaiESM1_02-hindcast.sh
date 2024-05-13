@@ -26,22 +26,27 @@
 #--- existing TaiESM1 case
 WRKDIR="/work/yihsuan123/taiesm1_test_hindcast/"
 #CASENAME="xx01-taiesm1.F_2000_TAI.f09_f09.1226_1050"
-CASENAME="hindcast02_2001July-taiesm1.F_2000_TAI.f09_f09"
+#CASENAME="hindcast02_2001July-taiesm1.F_2000_TAI.f09_f09"
+CASENAME="hindcast03-taiesm1.F_2000_TAI.f09_f09"
 #CASENAME="y1-hindcast_2001July-taiesm1.F_2000_TAI.f09_f09.0327_2045"
 CASE="$WRKDIR/$CASENAME"
 
 #--- initial condition data for each hindcase run
-icdata_path="/work/yihsuan123/data/data.TaiESM1_hindcast/data.July2001_ERA5.hindcast/"
-icdata_filehead="cami-snap_0000-01-01_0.9x1.25_L30.ERA5_ic."
+icdata_option="ERA5"
+#icdata_optio_option="JMA3Q"
+
+icdata_path="/work/yihsuan123/data/data.TaiESM1_hindcast/data.July2001_${icdata_option}.hindcast/"
+icdata_filehead="cami-snap_0000-01-01_0.9x1.25_L30.${icdata_option}_ic."
 icdata_fileend=".nc"
-start_date=20010704
+start_date=20010701
 #end_date=20010711
 end_date=$start_date
 hh="00Z"
 
 #--- stop options
 STOP_OPTION="ndays"
-STOP_N=6
+#STOP_N=6
+STOP_N=1
 
 #--- pause for 1 second in case you want to stop the script (set do_pause=F to skip)
 do_pause="T"
@@ -70,7 +75,7 @@ sleep_seconds=$((60 * 2))   # # seconds
 
 #--- back up this script
 if [ $do_backup_script == "T" ]; then
-  date_now=`date +%m%d_%H%M`
+  date_now=`date +%Y%m%d_%H%M`
   this_script="`pwd`/$0"
   #script_backup="$CASE/zz-run_hindcast.${CASENAME}.sh.${date_now}"
   script_backup="$CASE/zz-run_TaiESM1_02-hindcast.${CASENAME}.sh.${date_now}"
@@ -91,6 +96,7 @@ while [ "$current_date" -le "$end_date" ]; do
   cd $CASE || exit 1  ## move to the CASE directory
 
   echo "Hindcast simulation start date: [$current_date]"
+  echo "                    ic data   : [$icdata]"
 
   #--- check whether previous job is still in queue
   job_in_queue=0
@@ -146,7 +152,7 @@ while [ "$current_date" -le "$end_date" ]; do
 nhtfrq = -1, -3, -3, -3
 mfilt  = 24, 8, 8, 8
 ncdata = '${file1}'
-hfilename_spec = "%c.icdate_${current_date}.cam.h%t_2d_1h.%y-%m-%d-%s.nc", "%c.icdate_${current_date}.cam.h%t_state_3h.%y-%m-%d-%s.nc","%c.icdate_${current_date}.cam.h%t_Ttend_3h.%y-%m-%d-%s.nc", "%c.icdate_${current_date}.cam.h%t_Qtend_3h.%y-%m-%d-%s.nc"
+hfilename_spec = "%c.${icdata_option}_icdate_${current_date}.cam.h%t_2d_1h.%y-%m-%d-%s.nc", "%c.${icdata_option}_icdate_${current_date}.cam.h%t_state_3h.%y-%m-%d-%s.nc","%c.${icdata_option}_icdate_${current_date}.cam.h%t_Ttend_3h.%y-%m-%d-%s.nc", "%c.${icdata_option}_icdate_${current_date}.cam.h%t_Qtend_3h.%y-%m-%d-%s.nc"
 empty_htapes = .true. 
 
 fincl1 = "CLDHGH:A","CLDLOW:A","CLDMED:A","CLDTOT:A","FLDS:A","FLNS:A","FLNSC:A","FLUT:A","FLUTC:A","FSDS:A","FSDSC:A","FSNS:A","FSNSC:A","FSNTOA:A","FSNTOAC:A","FSUTOA:A","LHFLX:A","LWCF:A","PBLH:A","PRECC:A","PRECL:A","PS:A","QREFHT:A","SHFLX:A","SOLIN:A","SWCF:A","TREFHT:A","TS:A","U10:A","Z3:A","TGCLDIWP:A","TGCLDLWP:A","CONCLD:A","TMQ:A","AST:A","SST:A"
