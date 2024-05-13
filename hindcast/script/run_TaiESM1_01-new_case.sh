@@ -41,7 +41,8 @@ STOP_N=1
 WRKDIR="/work/yihsuan123/taiesm1_test_hindcast/"
 #CASENAME="xx01-taiesm1.${compset}.${res}.${temp}"
 #CASENAME="y1-hindcast_2001July-taiesm1.${compset}.${res}.${temp}"
-CASENAME="hindcast02_2001July-taiesm1.${compset}.${res}"
+#CASENAME="hindcast02_2001July-taiesm1.${compset}.${res}"
+CASENAME="hindcast03-taiesm1.${compset}.${res}"
 CASE="$WRKDIR/$CASENAME"
 
 #--- slurm setup
@@ -53,7 +54,8 @@ num_cpu=128          # number of cpu
 
 #--- source code change
 do_srcmod="T"
-srcmod_dir="/home/yihsuan123/research/TaiESM1_Sc_diag/scam_taiesm1/script/scam_mods"
+#srcmod_dir="/home/yihsuan123/research/TaiESM1_Sc_diag/scam_taiesm1/script/scam_mods"
+srcmod_dir="/home/yihsuan123/research/TaiESM1_Sc_diag/hindcast/script/src.cam"
 
 ##################
 # program start
@@ -63,8 +65,6 @@ srcmod_dir="/home/yihsuan123/research/TaiESM1_Sc_diag/scam_taiesm1/script/scam_m
 date_now=`date +%m%d_%H%M`
 this_script="`pwd`/$0"
 script_backup="$CASE/zz-run_TaiESM1_01-new_case.${CASENAME}.sh.${date_now}"
-
-run_TaiESM1_01-new_case.sh
 
 #--- check whether $srcmod_dir exist
 if [ $do_srcmod == "T" ]; then
