@@ -28,8 +28,9 @@
 #
 #    4. The SCM output will be at /work/$USER/$exp_name/$CASE/run  
 #
-#  Date:
-#    December 2023
+#  History:
+#    December 2023, create this script
+#    April    2024, update modules because Taiwania 3 upgraded its OS
 #===================================
 #
 
