@@ -1,0 +1,28 @@
+Original VOCALS netcdf file: VOCALS_REx-GFS_SCM_forc-all_times_stations.nc 
+IOP netcdf file: /lfs/home/dani/TaiESM_scam/ncinputs/IOP/VOCALS_ST[01:25]_4scam_[sigma,fixedgrid].nc
+Scripts used: /lfs/home/dani/TaiESM_scam/scripts/vocals/
+create_new_vocals_ncfiles_for_scm.m - no interpolation done, used the default vertical levels
+create_new_vocals_ncfiles_for_scm_fixedgrid.m - interpolated the 3D variables to fixed grid
+
+
+1. Created files for each station
+
+2. Variable Format
+   - date/time variables to ‘integer’
+   - others to ‘single’
+
+3. Date/time variables- created new variables to be compatible TaiESM ${taiesmfolder}/models/atm/cam/src/dynamics/eul/iop.F90
+   - tsec
+   - bdate
+
+4. Levels - although original VOCALS netcdf file have time varying vertical levels, TaiESM read this variable once - at initialization. Thus, the IOP file for scm simulation includes the first vertical level only, flipped.
+
+5. Two-dimensionals variables
+     - reshaped the dimension to time x lon x lat
+     - renamed: psfc to Ps and tsfc to Tg
+
+6. Three-dimensional variables
+     - reshaped the dimension to time x lev x lon x lat
+     - flipped data to be consistent with the flipped levels
+     - renamed t toT, dtdt to divT, and dqdt to divQ
+
