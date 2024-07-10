@@ -5,10 +5,10 @@
 - hindcast02_old (aka hindcast01, Previous Linux, ERA5, July 2001 hindcast)
   - These simulations were carried out before Taiwania 3 was upgraded. So the results might not be bit-by-bit the same when reruning in Rocky Linux environment.
   - Data path: /lfs/home/yihsuanc/data/data.TaiESM1_hindcast/data.TaiESM1.July2001_hindcast02_old/run
-  - Running script and settings: $path/
+  - Running script and settings: $path/hindcast01_2001July-taiesm1.F_2000_TAI.f09_f09
   - ERA5 initial data: $Path/hindcast01_2001July-taiesm1.F_2000_TAI.f09_f09.icdate_*
 
-- hindcast02 (Same as hindcast02_old, but adding new output fields in selected dates)
+- hindcast02 (Same as hindcast02_old, but adding new output fields in selected dates) 
   - Data path: /lfs/home/yihsuanc/data/data.TaiESM1_hindcast/data.TaiESM1.July2001_hindcast02/run
   - Running script and settings: $path/scripts
 
