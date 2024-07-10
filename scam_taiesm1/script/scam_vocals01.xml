@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!-- "IOP: VOCALS 2006 (01 Oct 2008 - 30 Nov 2008)" -->
+
+<namelist_defaults>
+
+<ncdata             hgrid="64x128"    nlev="30"   scam="1"  >atm/cam/inic/gaus/cami_0000-01-01_64x128_L30_c090102.nc</ncdata>
+<iopfile dyn="eul"                                scam="1"  >atm/cam/scam/iop/VOCALS_ST1_4scam.nc</iopfile>
+<scmlat                                           scam="1"  >   -20    </scmlat>
+<scmlon                                           scam="1"  >   265    </scmlon>
+<start_ymd                                        scam="1"  >   20081001  </start_ymd>
+<start_tod                                        scam="1"  >   0         </start_tod>
+<stop_n                                           scam="1"  >   4356      </stop_n>
+<mfilt                                            scam="1"  >   6480      </mfilt>
+<nhtfrq                                           scam="1"  >   1         </nhtfrq>
+<stop_option                                      scam="1"  >   nsteps    </stop_option>
+
+<!-- sim_year used for CLM datasets -->
+<sim_year>2000</sim_year>
+
+</namelist_defaults>
