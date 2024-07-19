@@ -23,22 +23,44 @@
 # user setting
 ###################
 
+set -x   ## echo all commands
+
+#--- set machine that is used in create_newcase, and username
+username="yihsuan123"
+
+mach="f1"
+#mach="T3"
+
+if [ $mach == "twnia3" ]; then
+  workdir="/work/$username/"
+elif [ $mach == "f1" ]; then
+  workdir="/work1/$username/"
+  module purge 
+  module use /home/j07cyt00/codecs/modulefiles
+
+else
+  echo "ERROR: machine [$mach] is not supported"
+  exit 1
+fi
+
 #--- existing TaiESM1 case
-WRKDIR="/work/yihsuan123/taiesm1_test_hindcast/"
+WRKDIR="$workdir/taiesm1_test_hindcast/"
 #CASENAME="xx01-taiesm1.F_2000_TAI.f09_f09.1226_1050"
 #CASENAME="hindcast02_2001July-taiesm1.F_2000_TAI.f09_f09"
-CASENAME="hindcast03-taiesm1.F_2000_TAI.f09_f09"
+#CASENAME="hindcast03-taiesm1.F_2000_TAI.f09_f09"
 #CASENAME="y1-hindcast_2001July-taiesm1.F_2000_TAI.f09_f09.0327_2045"
+CASENAME="xx-hindcast03-taiesm1.F_2000_TAI.f09_f09"
 CASE="$WRKDIR/$CASENAME"
 
 #--- initial condition data for each hindcase run
-#icdata_option="ERA5"
-icdata_option="JRA3Q"
+icdata_option="ERA5"
+#icdata_option="JRA3Q"
 
-icdata_path="/work/yihsuan123/data/data.TaiESM1_hindcast/data.July2001_${icdata_option}.hindcast/"
+#icdata_path="$workdir/data/data.TaiESM1_hindcast/data.July2001_${icdata_option}.hindcast/"
+icdata_path="$workdir/data/data.TaiESM1_hindcast/data.${icdata_option}.Oct_Nov2008.hindcast/"
 icdata_filehead="cami-snap_0000-01-01_0.9x1.25_L30.${icdata_option}_ic."
 icdata_fileend=".nc"
-start_date=20010701
+start_date=20081001
 #end_date=20010711
 end_date=$start_date
 hh="00Z"
