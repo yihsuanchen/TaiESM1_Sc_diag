@@ -3,7 +3,7 @@
 #  Bourne-Again shell script
 #
 #  Description:
-#    Run TaiESM1 simulation on Taiwania 3
+#    Run TaiESM1 simulation on Taiwania 3 (twnia3) or Forerunner 1 (f1) 
 #
 #  Usage:
 #    Edit the "user setting" section, and then execute this script
@@ -11,6 +11,9 @@
 #
 #    The case folder will be at $CASE
 #    The output will be at /work/$USER/taiesm_work/{CASENAME}
+#
+#  Resource:
+#    F1 Userguide: https://man.twcc.ai/@f1-manual/manual
 #
 #  Author:
 #    Yi-Hsuan Chen
@@ -23,12 +26,27 @@
 
 #set -x  # echo all commands
 
+#--- set machine that is used in create_newcase, and username
+username="yihsuan123"
+
+mach="f1"
+#mach="T3"
+
+if [ $mach == "twnia3" ]; then
+  workdir="/work/$username/"
+elif [ $mach == "f1" ]; then
+  workdir="/work1/$username/"
+else
+  echo "ERROR: machine [$mach] is not supported"
+  exit 1
+fi
+
 # temp variable
 temp=`date +%m%d_%H%M`
-yyyymmdd=`date  +%Y_%m_%d`
+yyyymmdd=`date +%Y_%m_%d`
 
 #--- TaiESM source code folder
-CCSMROOT="/work/yihsuan123/taiesm_ver170803/"
+CCSMROOT="$workdir/taiesm_ver170803/"  # on f1, copy from /home/j07hsu00/taiesm/ver170803
 
 #--- simulation setup
 compset="F_2000_TAI"
@@ -38,11 +56,12 @@ STOP_OPTION="ndays"
 STOP_N=1
 
 #--- simulation case
-WRKDIR="/work/yihsuan123/taiesm1_test_hindcast/"
+WRKDIR="$workdir/taiesm1_test_hindcast/"
 #CASENAME="xx01-taiesm1.${compset}.${res}.${temp}"
 #CASENAME="y1-hindcast_2001July-taiesm1.${compset}.${res}.${temp}"
 #CASENAME="hindcast02_2001July-taiesm1.${compset}.${res}"
-CASENAME="hindcast03-taiesm1.${compset}.${res}"
+#CASENAME="hindcast03-taiesm1.${compset}.${res}"
+CASENAME="hindcast03-taiesm1.${compset}.${res}.${temp}"
 CASE="$WRKDIR/$CASENAME"
 
 #--- slurm setup
@@ -84,7 +103,11 @@ fi
 cd $CCSMROOT/scripts  || exit 1
 
 #--- create_newcase
-./create_newcase -case ${CASE} -mach twnia3 -compset ${compset} -res ${res} || exit 1
+if [ $mach == "twnia3" ]; then
+  ./create_newcase -case ${CASE} -mach ${mach} -compset ${compset} -res ${res} || exit 1
+elif [ $mach == "f1" ]; then
+  ./create_newcase -case ${CASE} -mach ${mach} -compset ${compset} -res ${res} -mpilib impi -compiler intel || exit 1
+fi
 
 cd $CASE || exit 1
 
