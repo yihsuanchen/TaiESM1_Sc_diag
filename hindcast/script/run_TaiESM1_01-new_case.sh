@@ -34,8 +34,12 @@ mach="f1"
 
 if [ $mach == "twnia3" ]; then
   workdir="/work/$username/"
+  queue="ct224"        # name of queue on Taiwania 3. Use "sinfo -s" to view the available queue
 elif [ $mach == "f1" ]; then
   workdir="/work1/$username/"
+  queue="ct112"        # name of queue on F1. Use "sinfo -s" to view the available queue
+  module purge 
+  module use /home/j07cyt00/codecs/modulefiles
 else
   echo "ERROR: machine [$mach] is not supported"
   exit 1
@@ -61,14 +65,14 @@ WRKDIR="$workdir/taiesm1_test_hindcast/"
 #CASENAME="y1-hindcast_2001July-taiesm1.${compset}.${res}.${temp}"
 #CASENAME="hindcast02_2001July-taiesm1.${compset}.${res}"
 #CASENAME="hindcast03-taiesm1.${compset}.${res}"
-CASENAME="hindcast03-taiesm1.${compset}.${res}.${temp}"
+#CASENAME="hindcast03-taiesm1.${compset}.${res}.${temp}"
+CASENAME="xx-hindcast03-taiesm1.${compset}.${res}"
 CASE="$WRKDIR/$CASENAME"
 
 #--- slurm setup
 do_submit="F"        # "T": submit the job
 
 account="MST112228"  # account name on Taiwania 3
-queue="ct224"        # name of queue on Taiwania 3. Use "sinfo -s" to view the available queue
 num_cpu=128          # number of cpu
 
 #--- source code change
