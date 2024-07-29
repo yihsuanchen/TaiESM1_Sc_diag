@@ -19,10 +19,10 @@ You can rename the files as
 - ERA5_SFC.sp.${yyyy}${mm}_00Z.r1440x721.nc
 
 **Step-by-step instruction**
-1. Edit createIC_01a-icdata_select_time_loop.sh and then run it: ./createIC_01a-icdata_select_time_loop.sh 
+1. Edit createIC_01-icdata_select_time_loop.sh and then run it: ./createIC_01-icdata_select_time_loop.sh 
    This script will select each time step in the ERA5 files and write the selected data into new files.
 
-2. Edit createIC_ERA5_02-intrp_ERA5_to_CAM_coords.sh, and then run it.
+2. Edit createIC_ERA5_02-intrp_ERA5_to_CAM_coords.sh, and then run it: ./createIC_ERA5_02-intrp_ERA5_to_CAM_coords.sh
 
    This script will create commands running a NCL program with given files from the previous step.
    The NCL program will interpolate ERA5 surface pressure and T,Q,U,V on CAM hybrid vertical coordinate and lat/lon grids, and save these interpolated fileds into a new file. 
