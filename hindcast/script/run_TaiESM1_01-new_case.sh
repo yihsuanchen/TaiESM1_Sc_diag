@@ -37,7 +37,8 @@ if [ $mach == "twnia3" ]; then
   queue="ct224"        # name of queue on Taiwania 3. Use "sinfo -s" to view the available queue
 elif [ $mach == "f1" ]; then
   workdir="/work1/$username/"
-  queue="ct112"        # name of queue on F1. Use "sinfo -s" to view the available queue
+  #queue="ct112"        # name of queue on F1. Use "sinfo -s" to view the available queue
+  queue="development"   
   module purge 
   module use /home/j07cyt00/codecs/modulefiles
 else
@@ -66,7 +67,8 @@ WRKDIR="$workdir/taiesm1_test_hindcast/"
 #CASENAME="hindcast02_2001July-taiesm1.${compset}.${res}"
 #CASENAME="hindcast03-taiesm1.${compset}.${res}"
 #CASENAME="hindcast03-taiesm1.${compset}.${res}.${temp}"
-CASENAME="xx-hindcast03-taiesm1.${compset}.${res}"
+#CASENAME="xx-hindcast03-taiesm1.${compset}.${res}"
+CASENAME="hindcast03-taiesm1.${compset}.${res}"
 CASE="$WRKDIR/$CASENAME"
 
 #--- slurm setup
