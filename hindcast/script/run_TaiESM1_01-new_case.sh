@@ -74,7 +74,8 @@ CASE="$WRKDIR/$CASENAME"
 #--- slurm setup
 do_submit="F"        # "T": submit the job
 
-account="MST112228"  # account name on Taiwania 3
+#account="MST112228"  # account name on Taiwania 3
+account="MST113255"  # account name on Taiwania 3  # update on 2025/03/27
 num_cpu=128          # number of cpu
 
 #--- source code change
@@ -131,6 +132,7 @@ cd $CASE || exit 1
 ./xmlchange -file env_run.xml -id STOP_OPTION -val ${STOP_OPTION} || exit 300
 ./xmlchange -file env_run.xml -id STOP_N -val ${STOP_N}           || exit 300
 
+#--- Modify run_TaiESM1_02-hindcast.sh to set namelist parameters because namelist will be recreated.
 cat > ./user_nl_cam << EOF
 &cam_inparm
 nhtfrq = 24 
