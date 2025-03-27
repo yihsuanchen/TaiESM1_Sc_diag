@@ -11,8 +11,13 @@
 #    Edit the "user setting" section & user_nl_cam, and then execute this script
 #    > ./THIS_SCRIPT
 #
-#    The case folder will be at $CASE
-#    The output & log files will be at /work/$USER/taiesm_work/{CASENAME}
+#  Notes: 
+#    - The case folder will be at $CASE
+#    - The output & log files will be at /work/$USER/taiesm_work/{CASENAME}
+#    - If failed, the error will be at $CASE/stdout/*.out
+#    - You can manually add "#SBATCH --mail-user=yihsuanc@gate.sinica.edu.tw  # send an email if the model fails to run
+#                            #SBATCH --mail-type=FAIL"
+#      in $CASE/$CASENAME.run, so you will get an email notification when the simulation fails.
 #
 #  Author:
 #    Yi-Hsuan Chen
@@ -49,26 +54,33 @@ WRKDIR="$workdir/taiesm1_test_hindcast/"
 #CASENAME="hindcast02_2001July-taiesm1.F_2000_TAI.f09_f09"
 #CASENAME="hindcast03-taiesm1.F_2000_TAI.f09_f09"
 #CASENAME="y1-hindcast_2001July-taiesm1.F_2000_TAI.f09_f09.0327_2045"
-CASENAME="xx-hindcast03-taiesm1.F_2000_TAI.f09_f09"
+#CASENAME="xx-hindcast03-taiesm1.F_2000_TAI.f09_f09"
+CASENAME="hindcast03-taiesm1.F_2000_TAI.f09_f09"
 CASE="$WRKDIR/$CASENAME"
 
 #--- initial condition data for each hindcase run
 icdata_option="ERA5"
 #icdata_option="JRA3Q"
 
+hfilename_head="${icdata_option}"  # set history file name head
+
 #icdata_path="$workdir/data/data.TaiESM1_hindcast/data.July2001_${icdata_option}.hindcast/"
-icdata_path="$workdir/data/data.TaiESM1_hindcast/data.${icdata_option}.Oct_Nov2008.hindcast/"
+#icdata_path="$workdir/data/data.TaiESM1_hindcast/data.${icdata_option}.Oct_Nov2008.hindcast/"
+icdata_path="$workdir/data/data.TaiESM1_hindcast/data.${icdata_option}.Jul2001.hindcast/"
 icdata_filehead="cami-snap_0000-01-01_0.9x1.25_L30.${icdata_option}_ic."
 icdata_fileend=".nc"
-start_date=20081001
-#end_date=20010711
+#start_date=20080930
+start_date=20010711
+#end_date=20081010
 end_date=$start_date
-hh="00Z"
+#end_date=$((start_date+2))
+#hh="00Z"
+hh="12Z"
 
 #--- stop options
 STOP_OPTION="ndays"
-#STOP_N=6
-STOP_N=1
+STOP_N=6
+#STOP_N=3
 
 #--- pause for 1 second in case you want to stop the script (set do_pause=F to skip)
 do_pause="T"
@@ -84,8 +96,8 @@ hold_seconds=$((60 * 1))   # seconds
 counts_max=20  # maximum times of counts for hold_seconds
 
 #--- whether back up this script
-do_backup_script="T"  
-#do_backup_script="F"  
+#do_backup_script="T"  
+do_backup_script="F"  
 
 #--- sleep for a few minutes before submitting another job
 do_sleep="F"
@@ -162,6 +174,11 @@ while [ "$current_date" -le "$end_date" ]; do
   ./xmlchange -file env_run.xml -id STOP_OPTION   -val ${STOP_OPTION} || exit 300
   ./xmlchange -file env_run.xml -id STOP_N        -val ${STOP_N}      || exit 300
 
+  if [ $hh == "12Z" ]; then
+    ./xmlchange -file env_run.xml -id RUN_REFTOD  -val 43200      || exit 300
+    ./xmlchange -file env_run.xml -id START_TOD   -val 43200      || exit 300
+  fi
+
   #sed -i "s|ncdata =.*|ncdata = $file1|g" user_nl_cam  || exit 1
 
 #--- cam namelist
@@ -169,13 +186,16 @@ while [ "$current_date" -le "$end_date" ]; do
 #         Customize CAM output: https://ncar.github.io/CESM-Tutorial/notebooks/namelist/output/output_cam.html
 #         CESM1 output fields: https://www2.cesm.ucar.edu/models/cesm1.0/cam/docs/ug5_0/hist_flds_fv_cam4.html, search "Master Field List"
 #         CESM2 output fields: https://www2.cesm.ucar.edu/models/cesm2/atmosphere/docs/ug6/hist_flds_f2000.html
+#
+#    if you want to change a string in the namelist, for example, macrop_scheme = 'tpdf'. You need to use '', not "".
+#
   cat > ./user_nl_cam << EOF
 &cam_inparm
 nhtfrq = -1, -3, -3, -3
 mfilt  = 24, 8, 8, 8
 ncdata = '${file1}'
-hfilename_spec = "%c.${icdata_option}_icdate_${current_date}.cam.h%t_2d_1h.%y-%m-%d-%s.nc", "%c.${icdata_option}_icdate_${current_date}.cam.h%t_state_3h.%y-%m-%d-%s.nc","%c.${icdata_option}_icdate_${current_date}.cam.h%t_Ttend_3h.%y-%m-%d-%s.nc", "%c.${icdata_option}_icdate_${current_date}.cam.h%t_Qtend_3h.%y-%m-%d-%s.nc"
 empty_htapes = .true. 
+hfilename_spec = "%c.${hfilename_head}_icdate_${current_date}.cam.h%t_2d_1h.%y-%m-%d-%s.nc", "%c.${hfilename_head}_icdate_${current_date}.cam.h%t_state_3h.%y-%m-%d-%s.nc","%c.${hfilename_head}_icdate_${current_date}.cam.h%t_Ttend_3h.%y-%m-%d-%s.nc", "%c.${hfilename_head}_icdate_${current_date}.cam.h%t_Qtend_3h.%y-%m-%d-%s.nc"
 
 fincl1 = "CLDHGH:A","CLDLOW:A","CLDMED:A","CLDTOT:A","FLDS:A","FLNS:A","FLNSC:A","FLUT:A","FLUTC:A","FSDS:A","FSDSC:A","FSNS:A","FSNSC:A","FSNTOA:A","FSNTOAC:A","FSUTOA:A","LHFLX:A","LWCF:A","PBLH:A","PRECC:A","PRECL:A","PS:A","QREFHT:A","SHFLX:A","SOLIN:A","SWCF:A","TREFHT:A","TS:A","U10:A","Z3:A","TGCLDIWP:A","TGCLDLWP:A","CONCLD:A","TMQ:A","AST:A","SST:A"
 
