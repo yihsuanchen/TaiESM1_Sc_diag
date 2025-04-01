@@ -199,7 +199,7 @@ hfilename_spec = "%c.${hfilename_head}_icdate_${current_date}.cam.h%t_2d_1h.%y-%
 
 fincl1 = "CLDHGH:A","CLDLOW:A","CLDMED:A","CLDTOT:A","FLDS:A","FLNS:A","FLNSC:A","FLUT:A","FLUTC:A","FSDS:A","FSDSC:A","FSNS:A","FSNSC:A","FSNTOA:A","FSNTOAC:A","FSUTOA:A","LHFLX:A","LWCF:A","PBLH:A","PRECC:A","PRECL:A","PS:A","QREFHT:A","SHFLX:A","SOLIN:A","SWCF:A","TREFHT:A","TS:A","U10:A","Z3:A","TGCLDIWP:A","TGCLDLWP:A","CONCLD:A","TMQ:A","AST:A","SST:A"
 
-fincl2 = "CLDICE:A", "CLDLIQ:A", "CLOUD:A", "OMEGA:A","PS:A", "Q:A", "T:A", "U:A", "V:A", "Z3:A", "RELHUM:A"
+fincl2 = "CLDICE:A", "CLDLIQ:A", "CLOUD:A", "OMEGA:A","PS:A", "Q:A", "T:A", "U:A", "V:A", "Z3:A", "RELHUM:A", "KVH:A", "KVM:A
 
 fincl3 = "PS:A", "TTEND_TOT:A","DTCORE:A","PTTEND:A","ZMDT:A","EVAPTZM:A","FZSNTZM:A","EVSNTZM:A","ZMMTT:A","CMFDT:A","DPDLFT:A","SHDLFT:A", "MACPDT:A","MPDT:A","QRL:A","QRS:A","DTV:A","TTGWORO:A"
 
