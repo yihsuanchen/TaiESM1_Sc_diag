@@ -177,6 +177,9 @@ while [ "$current_date" -le "$end_date" ]; do
   if [ $hh == "12Z" ]; then
     ./xmlchange -file env_run.xml -id RUN_REFTOD  -val 43200      || exit 300
     ./xmlchange -file env_run.xml -id START_TOD   -val 43200      || exit 300
+  else
+    ./xmlchange -file env_run.xml -id RUN_REFTOD  -val 0          || exit 300
+    ./xmlchange -file env_run.xml -id START_TOD   -val 0          || exit 300
   fi
 
   #sed -i "s|ncdata =.*|ncdata = $file1|g" user_nl_cam  || exit 1
