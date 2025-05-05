@@ -59,6 +59,9 @@ WRKDIR="$workdir/taiesm1_test_hindcast/"
 CASENAME="qq02_macrop-hindcast-taiesm1.F_2000_TAI.f09_f09"
 #CASENAME="qq02_turb_a2l_10-hindcast-taiesm1.F_2000_TAI.f09_f09"
 #CASENAME="qq02_turb_a2l_50-hindcast-taiesm1.F_2000_TAI.f09_f09"
+#CASENAME="qq02_rhcrit_95-hindcast-taiesm1.F_2000_TAI.f09_f09"
+#CASENAME="qq02_rhcrit_70-hindcast-taiesm1.F_2000_TAI.f09_f09"
+CASENAME="qq02_rhcrit_99-hindcast-taiesm1.F_2000_TAI.f09_f09"
 
 CASE="$WRKDIR/$CASENAME"
 
@@ -70,7 +73,7 @@ icdata_option="ERA5"
 #macrop_scheme="updf"
 macrop_scheme="park"
 #hfilename_head="macro_${macrop_scheme}.${icdata_option}"
-hfilename_head="kkmacro_${macrop_scheme}.${icdata_option}"
+hfilename_head="macro_${macrop_scheme}.${icdata_option}"
 
 #icdata_path="$workdir/data/data.TaiESM1_hindcast/data.July2001_${icdata_option}.hindcast/"
 #icdata_path="$workdir/data/data.TaiESM1_hindcast/data.${icdata_option}.Oct_Nov2008.hindcast/"
