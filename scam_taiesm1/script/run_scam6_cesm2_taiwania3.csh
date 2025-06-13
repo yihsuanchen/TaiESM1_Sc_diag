@@ -17,7 +17,7 @@
 #            the namelist will be at /work/$USER/cesm2_work/cases/$CASE_EXP
 #
 #         If the SCAM failed, 
-#            the stdout and stderr files will be at /home/$USER/cesm/stdout/cesm.stdout[stderr]
+#            ?? the stdout and stderr files will be at /home/$USER/cesm/stdout/cesm.stdout[stderr]
 #            the SCAM log file will be at /work/$USER/cesm2_work/cases/$CASE_EXP/run/cesm.log
 #
 #  References
@@ -25,7 +25,8 @@
 #    - Example: run SCAM, https://ncar.github.io/CAM/doc/build/html/users_guide/atmospheric-configurations.html#cam-single-column-fscam-compset
 #
 #  Date:
-#    December 2023
+#    December 2023  - create
+#    June 13, 2025      - add user_nl_cam & clean up
 #===================================
 
 # echoing each command
@@ -49,10 +50,12 @@ module load rcec/tools-intel19
 #      In SCAM, it forced using mpi-serial in cime_config/??, but create_case uses openmpi. 
 #      As a result, ./case.build will fail with this error message using the unmodifed cime_config:
 #      "Makefile:193: *** NETCDF not found: Define NETCDF_PATH or NETCDF_C_PATH and NETCDF_FORTRAN_PATH in config_machines.xml or config_compilers.xml.  Stop.
-set CIME_SCRIPT  = /work/j07hsu00/cesm2_work/code/cesm23/cime/scripts  
+set CIME_SCRIPT  = /work/j07hsu00/cesm2_work/code/cesm23_beta017/cime/scripts  
 
 #--- parameters using in create_newcase. Modify it if needed
-set newcase_params = "--machine nchc3 --compiler intel --mpilib openmpi --compset FSCAM --res T42_T42 --queue ctest --project MST112228"
+set project = "MST113255"
+set queue   = "ctest"
+set newcase_params = "--machine nchc3 --compiler intel --mpilib openmpi --compset FSCAM --res T42_T42 --queue ${queue} --project ${project}"
 
 # -------------------------------------------------------------------------
 # setup for the SCAM run
@@ -65,24 +68,28 @@ set USER = yihsuan123
 set temp=`date +%m%d_%H%M%S`
 
 #--- set case
-set exp_name = "scam6_test"
+set CASENAME = "x2_scam6_test"
 
-set CASE = /work/${USER}/${exp_name}        # CASE folder where the SCAM will be built and run
+set CASE = /work/${USER}/scam6_work/${CASENAME}        # CASE folder where the SCAM will be built and run
 
-set do_newcase = true                       # true: crease a new case. false: using the existing CASE 
-#set do_newcase = false
+#set do_newcase = true                       # true: crease a new case. false: using the existing CASE 
+set do_newcase = false
 
 #--- supported iopname: /work/j07hsu00/cesm2_work/code/cesm23/components/cam/cime_config/usermods_dirs/
 #       scam_arm95       scam_atex        scam_cgilsS11    scam_cgilsS6     scam_dycomsRF02  scam_mandatory   scam_rico        scam_sparticus   scam_twp06       
 #       scam_arm97       scam_bomex       scam_cgilsS12    scam_dycomsRF01  scam_gateIII     scam_mpace       scam_SAS         scam_togaII 
 #set iopnames = ("scam_twp06" "scam_arm95")
-set iopnames = ("scam_twp06")
+#set iopnames = ("scam_dycomsRF01" "scam_dycomsRF02")
+set iopnames = ("scam_dycomsRF01")
+#set iopnames = ("scam_dycomsRF01")
 
 #--- SCAM experiments. Note that if do_newcase = false, all SCAM runs will be in same $CASE, so the SCAM doesn't need to be rebuilt everytime. 
 #    ${CASE_EXP_HEAD}${iopname} will be the folder name of SCAM experiment
-#set CASE_EXP_HEAD = "${CASE}/${exp_name}.${temp}_"
-#set CASE_EXP_HEAD = "${CASE}/${exp_name}_"
-set CASE_EXP_HEAD = "${CASE}/${exp_name}.${temp}_"
+
+set user_nl_cam = "Nc300"   # user-defined namelist
+#set user_nl_cam = "None"   # user-defined namelist
+set EXPNAME = "${CASENAME}.${user_nl_cam}.${temp}_"
+set CASE_EXP_HEAD = "${CASE}/${EXPNAME}"
 
 # ----------------------
 # link inputdata to your home directory
@@ -121,7 +128,6 @@ if ($do_newcase == "true") then  ## create a new case
   ./xmlchange NTASKS=1
   ./xmlchange TOTALPES=1
   ./case.setup  || exit 1
-
   ./case.build  || exit 1
 
 else
@@ -157,9 +163,19 @@ foreach iopname ($iopnames)
   cd $CIME_SCRIPT || exit 1
   ./create_clone --case $CASE_EXP --clone $CASE --user-mods-dir ../../components/cam/cime_config/usermods_dirs/${iopname} --keepexe || exit 1
 
-  #--- run SCAM
+  #--- switch to $CASE_EXP  
   cd $CASE_EXP || exit 1
-  ./xmlchange --force JOB_QUEUE=ctest
+
+  #--- set user_nl if needed
+  if ($user_nl_cam == "Nc300") then
+    cat >> user_nl_cam << EOF
+    micro_mg_nccons = .true.
+    micro_mg_ncnst = 300.e6
+EOF
+  endif
+
+  #--- run SCAM
+  ./xmlchange --force JOB_QUEUE=${queue}
   ./case.submit  || exit 1
 
 end   # end loop of iopnames
@@ -171,9 +187,8 @@ end   # end loop of iopnames
 #--- back up this script in $BLDDIR
 #set this_script = "$0"
 #set this_script = "`pwd`/$0"
-set script_name = "zz-run_scam6.csh.${temp}"
+set script_name = "zz-run_scam6.csh.${EXPNAME}.${temp}"
 cp $this_script $CASE/$script_name || exit 1
 
 exit 0
-
 
