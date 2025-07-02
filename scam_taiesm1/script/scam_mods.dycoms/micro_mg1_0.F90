@@ -142,8 +142,10 @@ real(r8) :: rhmini     ! Minimum rh for ice cloud fraction > 0.
 
 !<--- yhc 2025-06-13
 !  add nccons & ncnst following /cesm23/components/cam/src/physics/cam/micro_mg_cam.F90
-logical , parameter :: nccons = .true.  ! nccons=.true. to specify constant cloud droplet number
-real(r8), parameter :: ncnst  = 1e+8    ! droplet num concentration when nccons=.true. (m-3)
+!logical , parameter :: nccons = .true.  ! nccons=.true. to specify constant cloud droplet number
+logical , parameter :: nccons = .false.  ! nccons=.true. to specify constant cloud droplet number
+real(r8), parameter :: ncnst  = 100e+6    ! droplet num concentration when nccons=.true. (m-3), RF02, Nc ~ 100 cm^-3
+!real(r8), parameter :: ncnst  = 150e+6    ! droplet num concentration when nccons=.true. (m-3), RF01, Nc ~ 150cm^-3
 !---> yhc 2025-06-13
 
 !===============================================================================
