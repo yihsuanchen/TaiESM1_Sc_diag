@@ -1,5 +1,6 @@
 #!/bin/csh -f
-#SBATCH -A MST112228        # Account name/project number
+###SBATCH -A MST112228        # Account name/project number (expired)
+#SBATCH -A MST113255        # Account name/project number. Update on 2025/03/27
 #SBATCH -J scam_taiesm1     # Job name
 #SBATCH -p ctest            # Partition name
 #SBATCH -n 1                # Number of MPI tasks (i.e. processes)
@@ -7,7 +8,7 @@
 #SBATCH -N 1                # Maximum number of nodes to be allocated
 #SBATCH -o %j.out           # Path to the standard output file
 #SBATCH -e %j.err           # Path to the standard error ouput file
-#SBATCH --mail-user=yihsuanc@gate.sinica.edu.tw  # send an email if SCM fails to run
+#SBATCH --mail-user=yihsuanc@as.edu.tw  # send an email if SCM fails to run
 #SBATCH --mail-type=FAIL
 
 #===================================
@@ -22,15 +23,19 @@
 #    1. Make sure SBATCH setting are correct.
 #    2. Modify the variables in "setup for the SCAM run" section, such as the IOP case, model physics, etc.
 #    3. Run the script 
-#       > sbatch THIS_SCRIPT
+#       > ./THIS_SCRIPT
+#       or, > sbatch ./THIS_SCRIPT
 #
-#       if SCM fails to compile, you will get an notification email. The "*.err" and "*.out" log files will be in the folder where you run the script.
+#       if SCM fails, you will get an notification email when you use sbatch. The "*.err" and "*.out" log files will be in the folder where you run the script.
 #
-#    4. The SCM output will be at /work/$USER/$exp_name/$CASE/run  
+#    4. The SCM output will be at $WRKDIR/$CASE  
 #
 #  History:
-#    December 2023, create this script
-#    April    2024, update modules because Taiwania 3 upgraded its OS
+#    December  2023. create this script
+#    April     2024. update modules because Taiwania 3 upgraded its OS
+#    April 14, 2025. Test ok on Taiwania 3
+#    July 3,   2025. Add comments and clean up
+#    July 7,   2025. Clean up
 #===================================
 #
 
@@ -44,6 +49,7 @@ set echo
 # yhc 2023-11-21: SCM was compiled successfully with these below modules, but fail to execute "nf90_open". The error message was "Attempting to use an MPI routine before initializing MPICH".
 # module purge
 # module load cmake/3.15.4 compiler/intel/2020u4 IntelMPI/2020 netcdf-4.8.0-NC4-intel2020-impi pnetcdf-1.8.1-intel2020-impi
+
 # $CAM_ROOT/models/atm/cam/bld/configure -s -chem $aero_mode -dyn eul -res 64x128 -nospmd -nosmp -scam -ocn dom -comp_intf mct -phys cam5 -debug -fc ifort -v
 #
 #
@@ -83,47 +89,57 @@ set temp=`date +%m%d%H%M%S`
 set date_now=`date +%Y%m%d_%H%M`
 
 #--- set case
-#set exp_name = "qq04-scam_test"
-set exp_name = "scm_taiesm1"
+#set exp_name = "scm_taiesm1"
+set exp_name = "test01_scm_taiesm1"
 
 #--- available iopname: arm95 arm97 gateIII mpace sparticus togaII twp06, according to $CAM_ROOT/models/atm/cam/bld/build-namelist.
 #                       the build-namelist -use_case scam_${iopname} will fail if not these cases.
 #                       If the user wants to run other cases, it seems to need specify required parameters in the namelist file. 
 #                       These paramters should be able to found in CESM2 SCAM.
-#set iopname = 'arm95'
+set iopname = 'arm95'
+#set iopname = 'arm97'
 #set iopname = 'twp06'
-#set iopname = 'dycomsrf01'
-set iopname = 'dycomsrf02'
 
+#set iopname = 'dycomsrf01'
+#set iopname = 'dycomsrf02'
+
+#--- ncdata
+#  aeroNone: initial aerosol fields are zeros
+#  aeroIC  : aerosol fields are taken from /taiesm/inputdata/atm/cam/inic/fv/cami-mam3_0000-01-01_0.9x1.25_L30_c100618.nc
+set ncdata = "aeroNone"
+#set ncdata = "aeroIC"
+
+#--- physics package
 #set phys = "cam5"
 set phys = "taiphy"
 
-#set surf_flux = "psflx"  # prescribed surface sensible and latent heat fluxes
-set surf_flux = "isflx"  # interactive surface sensible and latent heat fluxes
+#--- set time step. default is 1200s (20 minutes)
+# Set dtime in seconds
+#set dtime = 60
+#set dtime = 300  
+set dtime = 1200
 
-#set CASE = ${exp_name}.${iopname}.${phys}.${temp}
-set CASE = ${exp_name}.${iopname}.${surf_flux}.${temp}
+#--- set surface fluxes
+#  psflx: prescribed surface sensible and latent heat fluxes
+#  isflx: interactive surface sensible and latent heat fluxes
+#set surf_flux = "psflx"  
+set surf_flux = "isflx"  
+
+#--- set experiment CASE
+#set CASE = "${exp_name}.${iopname}_${iop_input}.dt_${dtime}.macrop_${macrop_scheme}.${temp}.nc1e9"
+set CASE = "${exp_name}.${iopname}_${ncdata}"
+#set CASE = "${exp_name}.${iopname}_${ncdata}.${temp}"
+
+set hfilename_head = $CASE
 
 #--- set the folder that contains modifed codes
-#set SCAM_MODS = /home/yihsuan123/research/TaiESM1_Sc_diag/scam_taiesm1/script/scam_mods         # put the modifed files in this folder
-set SCAM_MODS = /home/yihsuan123/research/TaiESM1_Sc_diag/scam_taiesm1/script/scam_mods.dycoms   # scam_mods.dycoms
+set SCAM_MODS = /home/yihsuan123/research/TaiESM1_Sc_diag/scam_taiesm1/script/scam_mods         # put the modifed files in this folder
+#set SCAM_MODS = /home/yihsuan123/research/TaiESM1_Sc_diag/scam_taiesm1/script/scam_mods.old_20250501         # put the modifed files in this folder
+#set SCAM_MODS = /home/yihsuan123/research/TaiESM1_Sc_diag/scam_taiesm1/script/scam_mods.dycoms   # scam_mods.dycoms
                                                                                                  #   - no solar radiation (do_no_solar=True in radiation.F90)
                                                                                                  #   - radiation scheme is called at every time step 
-                                                                                                 #     (do_irad_every_time_step=True in runtime_opts.F90) 
-
-#--- check whether scm_iop_srf_prop is supported
-if ($surf_flux == "psflx") then
-  set text_srf = 'scm_iop_srf_prop= .true.'
-
-else if ($surf_flux == "isflx") then
-  set text_srf = 'scm_iop_srf_prop= .false.'
-
-else
-  echo "ERROR: surface flux option [$surf_flux] is not supported."
-  exit 1
-
-endif
-
+                                                                                                 #     (do_irad_every_time_step=True in runtime_opts.F90)
+                                                                                                 #   - modify micro_mg1_0.F90 to presribed Nc 
 #--- set folders
 set WRKDIR = /work/yihsuan123/taiesm_scm/${exp_name}/
 set BLDDIR = $WRKDIR/$CASE/bld
@@ -138,9 +154,9 @@ cp $this_script $BLDDIR/$script_name || exit 1
 
 cp -r $SCAM_MODS "$BLDDIR/zz-scam_mods.$date_now" || exit 1
 
-#--- not use sbatch
-#set this_script = "`pwd`/$0"
-#cp $this_script $BLDDIR || exit 1
+# -------------------------------------------------------------------------
+# run SCM
+# -------------------------------------------------------------------------
 
 # -------------------------------------------------------------------------
 # *** copy from the SCAM original script. May need to modify it if using TaiESM physics ***
@@ -148,14 +164,13 @@ cp -r $SCAM_MODS "$BLDDIR/zz-scam_mods.$date_now" || exit 1
 #   Here the boundary layer cases use prescribed aerosols while the deep convection
 #   and mixed phase cases use prognostic aerosols.  This is because the boundary layer
 #   cases are so short that the aerosols do not have time to spin up.
+#
+#if ($iopname == 'arm95' ||$iopname == 'arm97' ||$iopname == 'mpace' ||$iopname == 'twp06' ||$iopname == 'sparticus' ||$iopname == 'togaII' ||$iopname == 'gateIII' ||$iopname == 'IOPCASE') then
+#  set aero_mode = 'trop_mam3'
+#else
+#  set aero_mode = 'none'
+#endif
 # -------------------------------------------------------------------------
-
-if ($iopname == 'arm95' ||$iopname == 'arm97' ||$iopname == 'mpace' ||$iopname == 'twp06' ||$iopname == 'sparticus' ||$iopname == 'togaII' ||$iopname == 'gateIII' ||$iopname == 'IOPCASE') then
-  set aero_mode = 'trop_mam3'
-
-else
-  set aero_mode = 'none'
-endif
 
 # --------------------------
 # configure
@@ -195,20 +210,50 @@ endif
 
 #--- create namelist for respective iop
 
-#--- dycomsrf01 and dycomsrf02 namelist
-if ($iopname == 'dycomsrf01') then
-  #set iopfile = "/work/opt/ohpc/pkg/rcec/model/taiesm/inputdata/atm/cam/scam/iop/DYCOMSrf01_4day_4scam.nc"   # origional IOP, supersaturation is allowed.
-  set iopfile = "/home/yihsuan123/research/TaiESM1_Sc_diag/scam_taiesm1/iop_modified/DYCOMSrf01_4day_4scam_Recompute_Tqvql_inML.nc"  # remove supersaturation
-else if ($iopname == 'dycomsrf02') then
-  set iopfile = "/work/opt/ohpc/pkg/rcec/model/taiesm/inputdata/atm/cam/scam/iop/DYCOMSrf02_48hr_4scam.nc"
+if ($ncdata == 'aeroNone') then
+  set ncdata = '/home/j07hsu00/taiesm/inputdata/atm/cam/inic/gaus/cami_0000-01-01_64x128_L30_c090102.nc'
+else if ($ncdata == 'aeroIC') then
+  set ncdata = '/home/yihsuan123/research/TaiESM1_Sc_diag/scam_taiesm1/iop_modified/cami_0000-01-01_64x128_L30_c090102.yhc0701_aeroIC_cami-mam3.nc'
+else
+  echo "ERROR: ncdata $ncdata is not supported"
+  exit 1
 endif
 
+#--- set scm_iop_srf_prop
 if ($surf_flux == "psflx") then
   set text_srf = 'scm_iop_srf_prop= .true.'
+
 else if ($surf_flux == "isflx") then
   set text_srf = 'scm_iop_srf_prop= .false.'
+
 else
-  set text_srf =""
+  echo "ERROR: surface flux option [$surf_flux] is not supported."
+  exit 1
+
+endif
+
+#--- dycomsrf01 and dycomsrf02 namelist
+if ($iopname == 'dycomsrf01') then
+  if ($iop_input == 'orig') then
+    set iopfile = "/work/opt/ohpc/pkg/rcec/model/taiesm/inputdata/atm/cam/scam/iop/DYCOMSrf01_4day_4scam.nc"   # origional IOP, supersaturation is allowed.
+  else if ($iop_input == 'yhc0509') then
+    set iopfile = "/home/yihsuan123/research/TaiESM1_Sc_diag/scam_taiesm1/iop_modified/DYCOMSrf01_4day_4scam_yhc20250509.nc"  # change u=6 m/s and v=-4.25 m/s & remove supersaturation
+  else
+    echo "ERROR: iop_input $iop_input is not supported"
+    exit 1
+  endif
+
+else if ($iopname == 'dycomsrf02') then
+
+  if ($iop_input == 'orig') then
+    set iopfile = "/work/opt/ohpc/pkg/rcec/model/taiesm/inputdata/atm/cam/scam/iop/DYCOMSrf02_48hr_4scam.nc"
+  else if ($iop_input == 'yhc0509') then
+    set iopfile = "/home/yihsuan123/research/TaiESM1_Sc_diag/scam_taiesm1/iop_modified/DYCOMSrf02_48hr_4scam_yhc20250509.nc"  # make CLDLIQ=0
+  else
+    echo "ERROR: iop_input $iop_input is not supported"
+    exit 1
+  endif
+
 endif
 
 if ($iopname == 'dycomsrf01' || $iopname == 'dycomsrf02') then
@@ -216,19 +261,30 @@ if ($iopname == 'dycomsrf01' || $iopname == 'dycomsrf02') then
 cat <<EOF >! tmp_namelistfile
 &camexp 
     history_budget       = .true.,
-    nhtfrq               = 1, 
+    nhtfrq               = $nhtfrq, 
     print_energy_errors=.true., 
-    fincl1 = "TTEND_TOT:A","DTCORE:A","PTTEND:A","ZMDT:A","EVAPTZM:A","FZSNTZM:A","EVSNTZM:A","ZMMTT:A","CMFDT:A","DPDLFT:A","SHDLFT:A", "MACPDT:A","MPDT:A","QRL:A","QRS:A","DTV:A","TTGWORO:A", "PTEQ:A","ZMDQ:A","EVAPQZM:A","CMFDQ:A","MACPDQ:A","MPDQ:A","VD01:A", "PTECLDLIQ:A","ZMDLIQ:A","CMFDLIQ:A","MACPDLIQ:A","MPDLIQ:A","VDCLDLIQ:A", "PTECLDICE:A","ZMDICE:A","CMFDICE:A","MACPDICE:A","MPDICE:A","VDCLDICE:A", "DPDLFLIQ:A","DPDLFICE:A","SHDLFLIQ:A","SHDLFICE:A","DPDLFT:A","SHDLFT:A","QVTEND_TOT:A","QLTEND_TOT:A","QITEND_TOT:A","DQVCORE:A","DQLCORE:A","DQICORE:A"
+    history_aerosol		=     .true. 
 /
-
+&phys_ctl_nl
+    macrop_scheme = '${macrop_scheme}'
+/
 &cam_inparm
+    dtime = $dtime
+    hfilename_spec = "${hfilename_head}.cam.h%t.%y-%m-%d-%s.nc"
     iopfile = '${iopfile}',
     ${text_srf}
-    ncdata = '/home/j07hsu00/taiesm/inputdata/atm/cam/inic/gaus/cami_0000-01-01_64x128_L30_c090102.nc',
+    ncdata         = '${ncdata}'
     iradsw = 1,
     iradlw = 1
 /
+&seq_timemgr_inparm
+    stop_n               = $nstep
+    stop_option          = 'nsteps'
+/
+
 EOF
+
+##fincl1 = "CLDHGH:A","CLDLOW:A","CLDMED:A","CLDTOT:A","FLDS:A","FLNS:A","FLNSC:A","FLUT:A","FLUTC:A","FSDS:A","FSDSC:A","FSNS:A","FSNSC:A","FSNTOA:A","FSNTOAC:A","FSUTOA:A","LHFLX:A","LWCF:A","PBLH:A","PRECC:A","PRECL:A","PS:A","QREFHT:A","SHFLX:A","SOLIN:A","SWCF:A","TREFHT:A","TS:A","U10:A","Z3:A","TGCLDIWP:A","TGCLDLWP:A","CONCLD:A","TMQ:A","AST:A","SST:A", "CLDICE:A", "CLDLIQ:A", "CLOUD:A", "OMEGA:A","PS:A", "Q:A", "T:A", "U:A", "V:A", "Z3:A", "RELHUM:A", "KVH:A", "KVM:A", "PS:A", "TTEND_TOT:A","DTCORE:A","PTTEND:A","ZMDT:A","EVAPTZM:A","FZSNTZM:A","EVSNTZM:A","ZMMTT:A","CMFDT:A","DPDLFT:A","SHDLFT:A", "MACPDT:A","MPDT:A","QRL:A","QRS:A","DTV:A","TTGWORO:A"i, "PS:A", "PTEQ:A","ZMDQ:A","EVAPQZM:A","CMFDQ:A","MACPDQ:A","MPDQ:A","VD01:A", "PTECLDLIQ:A","ZMDLIQ:A","CMFDLIQ:A","DPDLFLIQ:A","SHDLFLIQ:A","MACPDLIQ:A","MPDLIQ:A","VDCLDLIQ:A","PTECLDICE:A","ZMDICE:A","CMFDICE:A","DPDLFICE:A","SHDLFICE:A","MACPDICE:A","MPDICE:A","VDCLDICE:A","QVTEND_TOT:A","QLTEND_TOT:A","QITEND_TOT:A","DQVCORE:A","DQLCORE:A","DQICORE:A"
 
 #--- twp06 namelist
 else if ($iopname == 'twp06') then
@@ -238,10 +294,12 @@ cat <<EOF >! tmp_namelistfile
     history_budget       = .true.,
     nhtfrq               = -3, 
     print_energy_errors=.true., 
+    history_aerosol		=     .true. 
 /
 &cam_inparm
     iopfile = '/work/opt/ohpc/pkg/rcec/model/taiesm/inputdata/atm/cam/scam/iop/TWP06_4scam.nc'
-    ncdata = "/home/j07hsu00/taiesm/inputdata/atm/cam/inic/gaus/cami_0000-01-01_64x128_L30_c090102.nc"  
+    ncdata         = '${ncdata}'
+    hfilename_spec = "${hfilename_head}.cam.h%t.%y-%m-%d-%s.nc"
 /
 &seq_timemgr_inparm
     stop_n               = 1872,
@@ -256,8 +314,11 @@ else
 cat <<EOF >! tmp_namelistfile
 &camexp 
     history_budget       = .true.,
-    nhtfrq               = 1, 
+    history_aerosol		=     .true. 
+    nhtfrq               = -1, 
     print_energy_errors=.true., 
+    ncdata         = '${ncdata}'
+    hfilename_spec = "${hfilename_head}.cam.h%t.%y-%m-%d-%s.nc"
 /
 
 EOF
