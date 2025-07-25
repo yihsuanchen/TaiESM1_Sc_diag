@@ -39,6 +39,10 @@ module physpkg
   use camsrfexch,      only: cam_export
   use phys_control,    only: do_waccm_phys
 
+  !<--- yhc 2025-07-25
+  use cam_history,      only: outfld, addfld, phys_decomp
+  !---> yhc 2025-07-25
+
   implicit none
   private
 
@@ -828,6 +832,68 @@ subroutine phys_init( phys_state, phys_tend, pbuf2d, cam_out )
     prec_sh_idx  = pbuf_get_index('PREC_SH')
     snow_sh_idx  = pbuf_get_index('SNOW_SH')
 
+    !<--- yhc 2025-07-25
+    call addfld( 's_ini_tphysbc', 'J/kg'   , pver   , 'A', 's at the begining of tphysbc'          , phys_decomp )
+    call addfld( 't_ini_tphysbc', 'J/kg'   , pver   , 'A', 't at the begining of tphysbc'          , phys_decomp )
+    call addfld( 'q_ini_tphysbc', 'J/kg'   , pver   , 'A', 'q at the begining of tphysbc'          , phys_decomp )
+    call addfld( 'ql_ini_tphysbc', 'J/kg'   , pver   , 'A', 'ql at the begining of tphysbc'          , phys_decomp )
+    call addfld( 'qi_ini_tphysbc', 'J/kg'   , pver   , 'A', 'qi at the begining of tphysbc'          , phys_decomp )
+
+    call addfld( 's_ini_tphysac', 'J/kg'   , pver   , 'A', 's at the begining of tphysac'          , phys_decomp )
+    call addfld( 't_ini_tphysac', 'J/kg'   , pver   , 'A', 't at the begining of tphysac'          , phys_decomp )
+    call addfld( 'q_ini_tphysac', 'J/kg'   , pver   , 'A', 'q at the begining of tphysac'          , phys_decomp )
+    call addfld( 'ql_ini_tphysac', 'J/kg'   , pver   , 'A', 'ql at the begining of tphysac'          , phys_decomp )
+    call addfld( 'qi_ini_tphysac', 'J/kg'   , pver   , 'A', 'qi at the begining of tphysac'          , phys_decomp )
+
+    call addfld( 's_aft_deep', 'J/kg'   , pver   , 'A', 's after deep convection'          , phys_decomp )
+    call addfld( 't_aft_deep', 'J/kg'   , pver   , 'A', 't after deep convection'          , phys_decomp )
+    call addfld( 'q_aft_deep', 'J/kg'   , pver   , 'A', 'q after deep convection'          , phys_decomp )
+    call addfld( 'ql_aft_deep', 'J/kg'   , pver   , 'A', 'ql after deep convection'          , phys_decomp )
+    call addfld( 'qi_aft_deep', 'J/kg'   , pver   , 'A', 'qi after deep convection'          , phys_decomp )
+
+    call addfld( 's_aft_shallow', 'J/kg'   , pver   , 'A', 's after shallow convection'          , phys_decomp )
+    call addfld( 't_aft_shallow', 'J/kg'   , pver   , 'A', 't after shallow convection'          , phys_decomp )
+    call addfld( 'q_aft_shallow', 'J/kg'   , pver   , 'A', 'q after shallow convection'          , phys_decomp )
+    call addfld( 'ql_aft_shallow', 'J/kg'   , pver   , 'A', 'ql after shallow convection'          , phys_decomp )
+    call addfld( 'qi_aft_shallow', 'J/kg'   , pver   , 'A', 'qi after shallow convection'          , phys_decomp )
+
+    call addfld( 's_aft_macro', 'J/kg'   , pver   , 'A', 's after macro'          , phys_decomp )
+    call addfld( 't_aft_macro', 'J/kg'   , pver   , 'A', 't after macro'          , phys_decomp )
+    call addfld( 'q_aft_macro', 'J/kg'   , pver   , 'A', 'q after macro'          , phys_decomp )
+    call addfld( 'ql_aft_macro', 'J/kg'   , pver   , 'A', 'ql after macro'          , phys_decomp )
+    call addfld( 'qi_aft_macro', 'J/kg'   , pver   , 'A', 'qi after macro'          , phys_decomp )
+
+    call addfld( 's_aft_micro', 'J/kg'   , pver   , 'A', 's after micro'          , phys_decomp )
+    call addfld( 't_aft_micro', 'J/kg'   , pver   , 'A', 't after micro'          , phys_decomp )
+    call addfld( 'q_aft_micro', 'J/kg'   , pver   , 'A', 'q after micro'          , phys_decomp )
+    call addfld( 'ql_aft_micro', 'J/kg'   , pver   , 'A', 'ql after micro'          , phys_decomp )
+    call addfld( 'qi_aft_micro', 'J/kg'   , pver   , 'A', 'qi after micro'          , phys_decomp )
+
+    call addfld( 's_aft_rad', 'J/kg'   , pver   , 'A', 's after radiation'          , phys_decomp )
+    call addfld( 't_aft_rad', 'J/kg'   , pver   , 'A', 't after radiation'          , phys_decomp )
+    call addfld( 'q_aft_rad', 'J/kg'   , pver   , 'A', 'q after radiation'          , phys_decomp )
+    call addfld( 'ql_aft_rad', 'J/kg'   , pver   , 'A', 'ql after radiation'          , phys_decomp )
+    call addfld( 'qi_aft_rad', 'J/kg'   , pver   , 'A', 'qi after radiation'          , phys_decomp )
+
+    call addfld( 's_aft_turb', 'J/kg'   , pver   , 'A', 's after turb'          , phys_decomp )
+    call addfld( 't_aft_turb', 'J/kg'   , pver   , 'A', 't after turb'          , phys_decomp )
+    call addfld( 'q_aft_turb', 'J/kg'   , pver   , 'A', 'q after turb'          , phys_decomp )
+    call addfld( 'ql_aft_turb', 'J/kg'   , pver   , 'A', 'ql after turb'          , phys_decomp )
+    call addfld( 'qi_aft_turb', 'J/kg'   , pver   , 'A', 'qi after turb'          , phys_decomp )
+
+    call addfld( 's_aft_ray', 'J/kg'   , pver   , 'A', 's after Rayleigh friction'          , phys_decomp )
+    call addfld( 't_aft_ray', 'J/kg'   , pver   , 'A', 't after Rayleigh friction'          , phys_decomp )
+    call addfld( 'q_aft_ray', 'J/kg'   , pver   , 'A', 'q after Rayleigh friction'          , phys_decomp )
+    call addfld( 'ql_aft_ray', 'J/kg'   , pver   , 'A', 'ql after Rayleigh friction'          , phys_decomp )
+    call addfld( 'qi_aft_ray', 'J/kg'   , pver   , 'A', 'qi after Rayleigh friction'          , phys_decomp )
+
+    call addfld( 's_aft_gwd', 'J/kg'   , pver   , 'A', 's after gravity wave drag'          , phys_decomp )
+    call addfld( 't_aft_gwd', 'J/kg'   , pver   , 'A', 't after gravity wave drag'          , phys_decomp )
+    call addfld( 'q_aft_gwd', 'J/kg'   , pver   , 'A', 'q after gravity wave drag'          , phys_decomp )
+    call addfld( 'ql_aft_gwd', 'J/kg'   , pver   , 'A', 'ql after gravity wave drag'          , phys_decomp )
+    call addfld( 'qi_aft_gwd', 'J/kg'   , pver   , 'A', 'qi after gravity wave drag'          , phys_decomp )
+    !---> yhc 2025-07-25
+
 end subroutine phys_init
 
   !
@@ -1394,6 +1460,14 @@ subroutine tphysac (ztodt,   cam_in,  &
          state%q(1,pver,1),state%rpdel(1,pver) ,cam_in%shf ,         &
          cam_in%lhf , cam_in%cflx )
 
+    !<--- yhc 2025-07-25
+    call outfld( 's_ini_tphysac' , state%s,                 pcols, lchnk )
+    call outfld( 't_ini_tphysac' , state%t,                 pcols, lchnk )
+    call outfld( 'q_ini_tphysac' , state%q(:ncol,:,1),      pcols, lchnk )
+    call outfld( 'ql_ini_tphysac', state%q(:ncol,:,2),      pcols, lchnk )
+    call outfld( 'qi_ini_tphysac', state%q(:ncol,:,3),      pcols, lchnk )
+    !---> yhc 2025-07-25
+
     call t_stopf('tphysac_init')
     !===================================================
     ! Source/sink terms for advected tracers.
@@ -1454,6 +1528,15 @@ subroutine tphysac (ztodt,   cam_in,  &
     endif
 
        call physics_update(state, ptend, ztodt, tend)
+
+       !<--- yhc 2025-07-25
+       call outfld( 's_aft_turb' , state%s,                pcols, lchnk )
+       call outfld( 't_aft_turb' , state%t,                pcols, lchnk )
+       call outfld( 'q_aft_turb' , state%q(:ncol,:,1),     pcols, lchnk )
+       call outfld( 'ql_aft_turb', state%q(:ncol,:,2),     pcols, lchnk )
+       call outfld( 'qi_aft_turb', state%q(:ncol,:,3),     pcols, lchnk )
+       !---> yhc 2025-07-25
+
        call t_stopf ('vertical_diffusion_tend')
     
     endif
@@ -1465,6 +1548,15 @@ subroutine tphysac (ztodt,   cam_in,  &
     call t_startf('rayleigh_friction')
     call rayleigh_friction_tend( ztodt, state, ptend)
     call physics_update(state, ptend, ztodt, tend)
+
+    !<--- yhc 2025-07-25
+    call outfld( 's_aft_ray' , state%s,                 pcols, lchnk )
+    call outfld( 't_aft_ray' , state%t,                 pcols, lchnk )
+    call outfld( 'q_aft_ray' , state%q(:ncol,:,1),      pcols, lchnk )
+    call outfld( 'ql_aft_ray', state%q(:ncol,:,2),      pcols, lchnk )
+    call outfld( 'qi_aft_ray', state%q(:ncol,:,3),      pcols, lchnk )
+    !---> yhc 2025-07-25
+
     call t_stopf('rayleigh_friction')
 
     if (do_clubb_sgs) then
@@ -1515,6 +1607,15 @@ subroutine tphysac (ztodt,   cam_in,  &
     call physics_update(state, ptend, ztodt, tend)
     ! Check energy integrals
     call check_energy_chng(state, tend, "gwdrag", nstep, ztodt, zero, zero, zero, zero)
+
+    !<--- yhc 2025-07-25
+    call outfld( 's_aft_gwd' , state%s,                 pcols, lchnk )
+    call outfld( 't_aft_gwd' , state%t,                 pcols, lchnk )
+    call outfld( 'q_aft_gwd' , state%q(:ncol,:,1),      pcols, lchnk )
+    call outfld( 'ql_aft_gwd', state%q(:ncol,:,2),      pcols, lchnk )
+    call outfld( 'qi_aft_gwd', state%q(:ncol,:,3),      pcols, lchnk )
+    !---> yhc 2025-07-25
+
     call t_stopf('gw_intr')
 
 #if ( defined WACCM_PHYS )
@@ -1880,6 +1981,14 @@ subroutine tphysbc (ztodt,               &
     ! compute mass integrals of input tracers state
     call check_tracers_init(state, tracerint)
 
+    !<--- yhc 2025-07-25
+    call outfld( 's_ini_tphysbc' , state%s,                 pcols, lchnk )
+    call outfld( 't_ini_tphysbc' , state%t,                 pcols, lchnk )
+    call outfld( 'q_ini_tphysbc' , state%q(:ncol,:,1),      pcols, lchnk )
+    call outfld( 'ql_ini_tphysbc', state%q(:ncol,:,2),      pcols, lchnk )
+    call outfld( 'qi_ini_tphysbc', state%q(:ncol,:,3),      pcols, lchnk )
+    !---> yhc 2025-07-25
+
     call t_stopf('bc_init')
 
     !===================================================
@@ -1976,6 +2085,14 @@ subroutine tphysbc (ztodt,               &
 
     call physics_update(state, ptend, ztodt, tend)
 
+    !<--- yhc 2025-07-25
+    call outfld( 's_aft_deep' , state%s,                 pcols, lchnk )
+    call outfld( 't_aft_deep' , state%t,                 pcols, lchnk )
+    call outfld( 'q_aft_deep' , state%q(:ncol,:,1),      pcols, lchnk )
+    call outfld( 'ql_aft_deep', state%q(:ncol,:,2),      pcols, lchnk )
+    call outfld( 'qi_aft_deep', state%q(:ncol,:,3),      pcols, lchnk )
+    !---> yhc 2025-07-25
+
     call pbuf_get_field(pbuf, prec_dp_idx, prec_dp )
     call pbuf_get_field(pbuf, snow_dp_idx, snow_dp )
     call pbuf_get_field(pbuf, prec_sh_idx, prec_sh )
@@ -2008,6 +2125,14 @@ subroutine tphysbc (ztodt,               &
     call t_stopf ('convect_shallow_tend')
 
     call physics_update(state, ptend, ztodt, tend)
+
+    !<--- yhc 2025-07-25
+    call outfld( 's_aft_shallow' , state%s,             pcols, lchnk )
+    call outfld( 't_aft_shallow' , state%t,             pcols, lchnk )
+    call outfld( 'q_aft_shallow' , state%q(:ncol,:,1),  pcols, lchnk )
+    call outfld( 'ql_aft_shallow', state%q(:ncol,:,2),  pcols, lchnk )
+    call outfld( 'qi_aft_shallow', state%q(:ncol,:,3),  pcols, lchnk )
+    !---> yhc 2025-07-25
 
     flx_cnd(:ncol) = prec_sh(:ncol) + rliq2(:ncol)
     call check_energy_chng(state, tend, "convect_shallow", nstep, ztodt, zero, flx_cnd, snow_sh, zero)
@@ -2118,6 +2243,14 @@ subroutine tphysbc (ztodt,               &
  
        endif 
 
+       !<--- yhc 2025-07-25
+       call outfld( 's_aft_macro' , state%s,               pcols, lchnk )
+       call outfld( 't_aft_macro' , state%t,               pcols, lchnk )
+       call outfld( 'q_aft_macro' , state%q(:ncol,:,1),    pcols, lchnk )
+       call outfld( 'ql_aft_macro', state%q(:ncol,:,2),    pcols, lchnk )
+       call outfld( 'qi_aft_macro', state%q(:ncol,:,3),    pcols, lchnk )
+       !---> yhc 2025-07-25
+
        call t_stopf('macrop_tend') 
 
        !===================================================
@@ -2141,6 +2274,14 @@ subroutine tphysbc (ztodt,               &
 
        call physics_ptend_dealloc(ptend_aero)
        call t_stopf('microp_tend')
+
+       !<--- yhc 2025-07-25
+       call outfld( 's_aft_micro' , state%s,               pcols, lchnk )
+       call outfld( 't_aft_micro' , state%t,               pcols, lchnk )
+       call outfld( 'q_aft_micro' , state%q(:ncol,:,1),    pcols, lchnk )
+       call outfld( 'ql_aft_micro', state%q(:ncol,:,2),    pcols, lchnk )
+       call outfld( 'qi_aft_micro', state%q(:ncol,:,3),    pcols, lchnk )
+       !---> yhc 2025-07-25
 
     endif
 
@@ -2228,6 +2369,14 @@ subroutine tphysbc (ztodt,               &
     end do
     call physics_update(state, ptend, ztodt, tend)
     call check_energy_chng(state, tend, "radheat", nstep, ztodt, zero, zero, zero, net_flx)
+
+    !<--- yhc 2025-07-25
+    call outfld( 's_aft_rad' , state%s,                 pcols, lchnk )
+    call outfld( 't_aft_rad' , state%t,                 pcols, lchnk )
+    call outfld( 'q_aft_rad' , state%q(:ncol,:,1),      pcols, lchnk )
+    call outfld( 'ql_aft_rad', state%q(:ncol,:,2),      pcols, lchnk )
+    call outfld( 'qi_aft_rad', state%q(:ncol,:,3),      pcols, lchnk )
+    !---> yhc 2025-07-25
 
     call t_stopf('radiation')
 
