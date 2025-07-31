@@ -44,6 +44,13 @@ module zm_conv
    real(r8) :: zmconv_c0_ocn = unset_r8    
    real(r8) :: zmconv_ke     = unset_r8    
 
+   !<--- yhc 2025-07-29. dummy variables. These will be used in zmmod_conv.F90
+   real(r8) :: zmconv_alfa    = unset_r8
+   real(r8) :: zmconv_dmpdz   = unset_r8
+   real(r8) :: zmconv_capelmt = unset_r8
+   real(r8) :: zmconv_tau     = unset_r8
+   !---> yhc 2025-07-29
+
    real(r8) rl         ! wg latent heat of vaporization.
    real(r8) cpres      ! specific heat at constant pressure in j/kg-degk.
    real(r8), parameter :: capelmt = 70._r8  ! threshold value for cape for deep convection.
@@ -86,7 +93,11 @@ subroutine zmconv_readnl(nlfile)
    integer :: unitn, ierr
    character(len=*), parameter :: subname = 'zmconv_readnl'
 
-   namelist /zmconv_nl/ zmconv_c0_lnd, zmconv_c0_ocn, zmconv_ke
+   !<--- yhc 2025-07-29. dummy namelist parameters. These will be used in zmmod_conv.F90
+   !namelist /zmconv_nl/ zmconv_c0_lnd, zmconv_c0_ocn, zmconv_ke
+   namelist /zmconv_nl/ zmconv_c0_lnd, zmconv_c0_ocn, zmconv_ke, zmconv_alfa, zmconv_dmpdz, zmconv_capelmt, zmconv_tau
+   !---> yhc 2025-07-29
+   
    !-----------------------------------------------------------------------------
 
    if (masterproc) then
