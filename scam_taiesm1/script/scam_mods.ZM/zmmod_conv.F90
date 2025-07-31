@@ -60,9 +60,29 @@ module zmmod_conv
    real(r8) :: zmconv_c0_ocn = unset_r8    
    real(r8) :: zmconv_ke     = unset_r8    
 
+   !<--- yhc 2025-07-29, add new namelist parameters
+   !     References: 
+   !       Guo et al. (2024, GMD): LB-SCAM: a learning-based method for efficient large-scale sensitivity analysis and tuning of the Single Column Atmosphere Model (SCAM), doi: 10.5194/gmd-17-3975-2024
+   !       Qian et al. (2015, JAMES): Parametric sensitivity analysis of precipitation at global and local scales in the Community Atmosphere Model CAM5, doi: 10.1002/2014MS000354
+   real(r8) :: zmconv_alfa    = unset_r8    ! Maximum cloud downdraft mass ﬂux fraction
+   real(r8) :: zmconv_dmpdz   = unset_r8    ! Parcel fractional mass entrainment rate
+   real(r8) :: zmconv_capelmt = unset_r8    ! Threshold value for CAPE
+   real(r8) :: zmconv_tau     = unset_r8    ! Time scale for consumption rate deep CAPE
+
+   !real(r8) :: zmconv_alfa    = 0.1_r8     ! default values in SCM
+   !real(r8) :: zmconv_dmpdz   = -1.e-3_r8
+   !real(r8) :: zmconv_capelmt = 70._r8
+   !real(r8) :: zmconv_tau     = 3600._r8
+   !---> yhc 2025-07-29
+
    real(r8) rl         ! wg latent heat of vaporization.
    real(r8) cpres      ! specific heat at constant pressure in j/kg-degk.
-   real(r8), parameter :: capelmt = 70._r8  ! threshold value for cape for deep convection.
+
+   !<--- yhc 2025-07-29, make camelmt not a parameter
+   !real(r8), parameter :: capelmt = 70._r8  ! threshold value for cape for deep convection. 
+   real(r8) :: capelmt  
+   !---> yhc 2025-07-29
+
    real(r8) :: ke           ! Tunable evaporation efficiency set from namelist input zmconv_ke
    real(r8) :: c0_lnd       ! set from namelist input zmconv_c0_lnd
    real(r8) :: c0_ocn       ! set from namelist input zmconv_c0_ocn
@@ -73,7 +93,6 @@ module zmmod_conv
    real(r8) :: tfreez
    real(r8) :: eps1
       
-
    logical :: no_deep_pbl ! default = .false.
                           ! no_deep_pbl = .true. eliminates deep convection entirely within PBL 
    
@@ -105,7 +124,11 @@ subroutine zmmodconv_readnl(nlfile)
    integer :: unitn, ierr
    character(len=*), parameter :: subname = 'zmmodconv_readnl'
 
-   namelist /zmconv_nl/ zmconv_c0_lnd, zmconv_c0_ocn, zmconv_ke
+   !<--- yhc 2025-07-29. add new namelist parameters
+   !namelist /zmconv_nl/ zmconv_c0_lnd, zmconv_c0_ocn, zmconv_ke
+   namelist /zmconv_nl/ zmconv_c0_lnd, zmconv_c0_ocn, zmconv_ke, zmconv_alfa, zmconv_dmpdz, zmconv_capelmt, zmconv_tau
+   !---> yhc 2025-07-29
+
    !-----------------------------------------------------------------------------
 
    if (masterproc) then
@@ -125,6 +148,11 @@ subroutine zmmodconv_readnl(nlfile)
       c0_lnd = zmconv_c0_lnd
       c0_ocn = zmconv_c0_ocn
       ke = zmconv_ke
+
+      !<--- yhc 2025-07-29, make tau and capelmt as namelist parameters
+      tau     = zmconv_tau 
+      capelmt = zmconv_capelmt
+      !---> yhc 2025-07-29
 
    end if
 
@@ -172,8 +200,11 @@ subroutine zmmod_convi(limcnv_in, no_deep_pbl_in)
    ! convection is too weak, thus adjusted to 2400.
 
    hgrid = get_resolution()
-   tau = 3600._r8
- 
+
+   !<--- yhc 2025-07-29, comment out tau, as it is set in subroutine zmmodconv_readnl
+   !tau = 3600._r8 
+   !---> yhc 2025-07-29
+
    ! +++ Yi-Chi +++ !
    call zmmodconv_readnl(nlfilename)
    ! --- Yi-Chi --- !
@@ -183,6 +214,11 @@ subroutine zmmod_convi(limcnv_in, no_deep_pbl_in)
       write(iulog,*) 'tuning parameters zmmod_convi: c0_lnd',c0_lnd, ', c0_ocn', c0_ocn 
       write(iulog,*) 'tuning parameters zmmod_convi: ke',ke
       write(iulog,*) 'tuning parameters zmmod_convi: no_deep_pbl',no_deep_pbl
+      !<--- yhc 2025-07-29, write out tuning parameters
+      write(iulog,*) 'tuning parameters zmmod_convi: alfa', zmconv_alfa 
+      write(iulog,*) 'tuning parameters zmmod_convi: dmpdz', zmconv_dmpdz
+      write(iulog,*) 'tuning parameters zmmod_convi: capelmt', capelmt
+      !---> yhc 2025-07-29
    endif
 
    if (masterproc) write(iulog,*)'**** ZM: DILUTE Buoyancy Calculation ****'
@@ -594,6 +630,7 @@ subroutine zmmod_convr(lchnk   ,ncol    , &
 ! (ideep=1) or not (ideep=0), based on values of cape,lcl,lel
 ! (require cape.gt. 0 and lel<lcl as minimum conditions).
 !
+
    lengath = 0
    do i=1,ncol
       if (cape(i) > capelmt) then
@@ -2158,7 +2195,7 @@ subroutine cldprp(lchnk   , &
    real(r8) est(pcols)
    real(r8) totpcp(pcols)
    real(r8) totevp(pcols)
-   real(r8) alfa(pcols)
+   real(r8) alfa(pcols)  
    real(r8) ql1
    real(r8) tu
    real(r8) estu
@@ -2502,7 +2539,11 @@ subroutine cldprp(lchnk   , &
 !
 ! in normal downdraft strength run alfa=0.2.  In test4 alfa=0.1
 !
-      alfa(i) = 0.1_r8
+      !<--- yhc 2025-07-29, make alfa as a namelist parameter
+      ! alfa(i) = 0.1_r8
+      alfa(i) = zmconv_alfa
+      !---> yhc 2025-07-29
+
       jt(i) = min(jt(i),jb(i)-1)
       jd(i) = max(j0(i),jt(i)+1)
       jd(i) = min(jd(i),jb(i))
@@ -2777,7 +2818,7 @@ subroutine closure(lchnk   , &
 
    real(r8) dtbdt(pcols),dqbdt(pcols),dtldt(pcols)
    real(r8) beta
-   real(r8) capelmt
+   real(r8) capelmt  
    real(r8) cp
    real(r8) dadt(pcols)
    real(r8) debdt
@@ -3464,7 +3505,7 @@ real(r8) mp0(pcols)    ! Parcel launch relative mass flux.
 real(r8) lwmax      ! Maximum condesate that can be held in cloud before rainout.
 real(r8) dmpdp      ! Parcel fractional mass entrainment rate (/mb).
 !real(r8) dmpdpc     ! In cloud parcel mass entrainment rate (/mb).
-real(r8) dmpdz      ! Parcel fractional mass entrainment rate (/m)
+real(r8) dmpdz      ! Parcel fractional mass entrainment rate (/m)  
 real(r8) dpdz,dzdp  ! Hydrstatic relation and inverse of.
 real(r8) senv       ! Environmental entropy at each grid point.
 real(r8) qtenv      ! Environmental total water "   "   ".
@@ -3498,7 +3539,12 @@ integer i,k,ii   ! Loop counters.
 !
 
 nit_lheat = 2 ! iterations for ds,dq changes from condensation freezing.
-dmpdz=-1.e-3_r8        ! Entrainment rate. (-ve for /m)
+
+!<--- yhc 2025-07-29, set dmpdz as a namelist parameter
+!dmpdz=-1.e-3_r8        ! Entrainment rate. (-ve for /m)
+dmpdz = zmconv_dmpdz  
+!---> yhc 2025-07-29
+
 !dmpdpc = 3.e-2_r8   ! In cloud entrainment rate (/mb).
 lwmax = 1.e-3_r8    ! Need to put formula in for this.
 tscool = 0.0_r8   ! Temp at which water loading freezes in the cloud.
