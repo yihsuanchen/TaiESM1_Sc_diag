@@ -1070,6 +1070,13 @@
 <zmconv_ke                       hgrid="256x512"                      > 1.0E-6 </zmconv_ke>
 <zmconv_ke                       hgrid="512x1024"                     > 1.0E-6 </zmconv_ke>
 
+<!-- yhc 2025-07-29, add new namelist parameters START -->
+<zmconv_alfa                                                          > 0.1D0   </zmconv_alfa>
+<zmconv_dmpdz                                                         >-1.0E-3  </zmconv_dmpdz>
+<zmconv_capelmt                                                       > 70.0D0  </zmconv_capelmt>
+<zmconv_tau                                                           > 3600.D0 </zmconv_tau>
+<!-- yhc 2025-07-29, add new namelist parameters END -->
+
 
 <!-- Cloud sedimentation -->
 

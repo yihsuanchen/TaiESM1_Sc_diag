@@ -2738,6 +2738,13 @@ add_default($nl, 'zmconv_c0_lnd');
 add_default($nl, 'zmconv_c0_ocn');
 add_default($nl, 'zmconv_ke');
 
+# <--- yhc 2025-07-29. Add new namelist parameters
+add_default($nl, 'zmconv_alfa');
+add_default($nl, 'zmconv_dmpdz');
+add_default($nl, 'zmconv_capelmt');
+add_default($nl, 'zmconv_tau');
+# ---> yhc 2025-07-29
+
 # moist convection rainwater coefficients
 add_default($nl, 'hkconv_cmftau');
 add_default($nl, 'hkconv_c0');
