@@ -90,6 +90,8 @@
                                                                 ! 'wstar3' due to entrainment.
 
   real(r8),         parameter :: a2l            =   30._r8      ! Moist entrainment enhancement param (recommended range : 10~30 )
+  !real(r8),         parameter :: a2l            =   10._r8      ! yhc, Moist entrainment enhancement param (recommended range : 10~30 ).
+  !real(r8),         parameter :: a2l            =   50._r8      ! yhc, Moist entrainment enhancement param (recommended range : 10~30 ).
   real(r8),         parameter :: a3l            =   0.8_r8      ! Approximation to a complicated thermodynamic parameters
 
   real(r8),         parameter :: jbumin         =   .001_r8     ! Minimum buoyancy jump at an entrainment jump, [m/s2]
@@ -2706,7 +2708,8 @@
 
           ! Diagnostic Output
 
-          wet_CL(i,ncv)        = wet
+          !wet_CL(i,ncv)        = wet
+          wet_CL(i,kt)        = wet    ! yhc, ncv=1 and it seems wrong. Set to kt.
           web_CL(i,ncv)        = web
           jtbu_CL(i,ncv)       = jtbu
           jbbu_CL(i,ncv)       = jbbu
