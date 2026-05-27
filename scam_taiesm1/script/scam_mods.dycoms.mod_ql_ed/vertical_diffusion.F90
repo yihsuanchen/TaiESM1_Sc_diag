@@ -1221,6 +1221,7 @@ contains
              extra_msg="Error in fieldlist_wet call from vertical_diffusion.")
 
         case ( 'diag_TKE', 'HB','HBR' )
+
         call compute_vdiff( state%lchnk   ,                                                                     &
                             pcols         , pver               , pcnst        , ncol          , state%pmid    , &
                             state%pint    , state%rpdel        , state%t      , ztodt         , taux          , &
@@ -1230,7 +1231,11 @@ contains
                             u_tmp         , v_tmp              , q_tmp        , s_tmp         ,                 &
                             tautmsx       , tautmsy            , dtk          , topflx        , errstring     , &
                             tauresx       , tauresy            , 1            , cpairv(:,:,state%lchnk), rairi, &
-                            do_molec_diff , compute_molec_diff , vd_lu_qdecomp, kvt )
+                            !<--- yhc, 2026-05-27, modify eddy diffusivity for cloud liquid  
+                            !original code, do_molec_diff , compute_molec_diff , vd_lu_qdecomp, kvt )
+                            do_molec_diff , compute_molec_diff , vd_lu_qdecomp, kvt, ixcldliq=ixcldliq)
+                            !---> yhc, 2026-05-27 
+
 
         call handle_errmsg(errstring, subname="compute_vdiff", &
              extra_msg="Error in fieldlist_wet call from vertical_diffusion.")
@@ -1286,7 +1291,10 @@ contains
                             u_tmp         , v_tmp              , q_tmp        , s_tmp         ,                 &
                             tautmsx       , tautmsy            , dtk          , topflx        , errstring     , &
                             tauresx       , tauresy            , 1            , cpairv(:,:,state%lchnk), rairi, &
-                            do_molec_diff , compute_molec_diff , vd_lu_qdecomp )
+                            !<--- yhc, 2026-05-27, modify eddy diffusivity for cloud liquid  
+                            !original code, do_molec_diff , compute_molec_diff , vd_lu_qdecomp, kvt )
+                            do_molec_diff , compute_molec_diff , vd_lu_qdecomp, kvt, ixcldliq=ixcldliq)
+                            !---> yhc, 2026-05-27 
 
         call handle_errmsg(errstring, subname="compute_vdiff", &
              extra_msg="Error in fieldlist_dry call from vertical_diffusion.")
