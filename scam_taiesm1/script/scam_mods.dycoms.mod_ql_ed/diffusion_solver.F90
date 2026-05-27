@@ -141,7 +141,8 @@
                             u               , v                  , q             , dse          ,               &
                             tautmsx         , tautmsy            , dtk           , topflx       , errstring   , &
                             tauresx         , tauresy            , itaures       , cpairv       , rairi       , &
-                            do_molec_diff  , compute_molec_diff, vd_lu_qdecomp, kvt )
+                            do_molec_diff  , compute_molec_diff, vd_lu_qdecomp, kvt, ixcldliq)  ! yhc, 2026-05-27
+                            !original, do_molec_diff  , compute_molec_diff, vd_lu_qdecomp, kvt )
 
     !-------------------------------------------------------------------------- !
     ! Driver routine to compute vertical diffusion of momentum, moisture, trace !
@@ -198,6 +199,29 @@
     real(r8), intent(out), optional :: kvt(pcols,pver+1) ! Kinematic molecular conductivity
     type(vdiff_selector), intent(in) :: fieldlist        ! Array of flags selecting which fields to diffuse
     type(vdiff_selector), intent(in) :: fieldlistm       ! Array of flags selecting which fields for molecular diffusion
+
+    !<--- yhc, 2026-05-27, use a different eddy diffusivity for cloud liquid 
+    ! --- EXPERIMENTAL CONTROL SWITCH ---
+    ! Set your desired mode here directly inside the solver:
+    ! kvq_switch = 0 : No modifications (Original baseline model)
+    ! kvq_switch = 1 : Multiply kvq_active by a uniform factor, kvq_factor_ql (e.g., 0.5)
+    ! kvq_switch = 2 : Zero out kvq_active below the a certain height
+    integer, parameter :: kvq_switch = 2
+
+    integer,  intent(in), optional  :: ixcldliq
+    real(r8) :: kvq_active(pcols,pver+1)
+
+    !--- kvq_switch = 1 
+    !real(r8), parameter :: kvq_factor_ql = 0._r8
+    real(r8), parameter :: kvq_factor_ql = 0.5_r8
+
+    !--- kvq_switch = 2 
+    real(r8) :: kvq_zero_hgt(pcols)
+    real(r8) :: cld_base_hgt(pcols)
+    real(r8), parameter :: ql_threshold = 1.E-6_r8  ! threshold to determine cloud base
+
+    logical :: do_printout = .true.
+    !---> yhc, 2026-05-27 
 
     ! ---------------------- !
     ! Input-Output Arguments !
@@ -722,6 +746,74 @@
 
        if( diffuse(fieldlist,'q',m) ) then
 
+           !<--- yhc, 2026-05-27
+           ! --- EXPERIMENTAL CONTROL SWITCH LAYER ---
+           if (do_printout .and. present(ixcldliq)) write (iulog, *)  'm,ixcldliq', m,ixcldliq 
+
+           if ( present(ixcldliq) .and. (m == ixcldliq) ) then ! <-- Removed present(kvq_switch)
+
+              ! FORCE THE MODEL TO RE-DECOMPOSE THE MATRIX FOR CLDLIQ
+              need_decomp = .true.
+
+              select case ( kvq_switch )
+              
+              case ( 1 )
+                 ! SWITCH = 1: Multiply the active tracer array by a factor
+                 kvq_active(:ncol, :) = kvq(:ncol, :) * kvq_factor_ql
+                 if (do_printout) write (iulog, *)  'kvq_switch', kvq_switch
+                 if (do_printout) write (iulog, *) 'kvq', kvq
+                 if (do_printout) write (iulog, *) 'kvq_active', kvq_active
+
+              case ( 2 )
+                 ! SWITCH = 2: Modify tracer profile below the cloud base
+                 if (do_printout) write (iulog, *)  'kvq_switch', kvq_switch
+                 kvq_active(:ncol, :) = kvq(:ncol, :) * kvq_factor_ql
+                 cld_base_hgt(:ncol) = 99999._r8
+                 kvq_zero_hgt(:ncol) = -999._r8
+
+                 ! Trace upward from the surface to isolate the cloud floor boundary
+                 do i = 1, ncol
+                    do k = pver, 1, -1
+                       if (q(i,k,ixcldliq) > ql_threshold) then
+                          cld_base_hgt(i) = zi(i, k+1)
+                          kvq_zero_hgt(i) = zi(i, k+2)  ! one level below the cloud base
+                          !kvq_zero_hgt(i) = zi(i, pver+1)
+                          exit 
+                       end if
+                    end do
+                 end do
+
+                 ! Suppress tracer transport dynamics exclusively beneath cloud levels
+                 do k = ntop, nbot + 1
+                    do i = 1, ncol
+                       if ( zi(i, k) <= kvq_zero_hgt(i) ) then
+                          kvq_active(i, k) = 0.0_r8
+                       else
+                          kvq_active(i, k) = kvq(i, k)
+                       end if
+                    end do
+                 end do
+
+              case default
+                 ! SWITCH = 0: Baseline un-modified mode
+                 if (do_printout) write (iulog, *)  'kvq_switch', kvq_switch
+                 kvq_active(:ncol, :) = kvq(:ncol, :)
+
+              end select
+
+           else
+              ! For normal tracers, if the previous tracer was CLDLIQ.
+              ! we need to force a re-decomposition back to normal kvq.
+              if ( present(ixcldliq) .and. (m == ixcldliq + 1) ) need_decomp = .true.
+
+              kvq_active(:ncol, :) = kvq(:ncol, :)
+            
+              if (do_printout) write (iulog, *)  'kvq_switch, no ixcldliq',kvq_switch
+
+           end if  ! end if of ixcldliq
+           ! -----------------------------------------
+           !---> yhc, 2026-05-27
+
            ! Add the nonlocal transport terms to constituents in the PBL.
            ! Check for neg q's in each constituent and put the original vertical
            ! profile back if a neg value is found. A neg value implies that the
@@ -749,9 +841,14 @@
 
            if( need_decomp ) then
 
+           !<--- yhc, 2026-05-27, update kvq TO kvq_active
                call vd_lu_decomp( pcols , pver , ncol  ,                         &
-                                  zero  , kvq  , tmpi2 , rpdel , ztodt , zero  , &
+                                  zero  , kvq_active  , tmpi2 , rpdel , ztodt , zero  , &
                                   ca    , cc   , dnom  , tmpm  , ntop  , nbot )
+               !### original code, call vd_lu_decomp( pcols , pver , ncol  ,                         &
+               !                   zero  , kvq  , tmpi2 , rpdel , ztodt , zero  , &
+               !                   ca    , cc   , dnom  , tmpm  , ntop  , nbot )
+           !---> yhc, 2026-05-27
 
                if( do_molec_diff ) then
 
@@ -781,7 +878,10 @@
            call vd_lu_solve(  pcols , pver , ncol  ,                         &
                               q(1,1,m) , ca, tmpm  , dnom  , ntop  , nbot  , cd_top )
        end if
+
+       if (do_printout .and. present(ixcldliq) .and. m == ixcldliq) write (iulog, *)  'ql tend', q(:,:,m) 
     end do
+    
 
     return
   end subroutine compute_vdiff
