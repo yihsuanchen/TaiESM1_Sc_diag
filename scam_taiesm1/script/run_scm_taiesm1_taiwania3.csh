@@ -141,11 +141,18 @@ set SCAM_MODS = /home/yihsuan123/research/TaiESM1_Sc_diag/scam_taiesm1/script/sc
                                                                                                  #     (do_irad_every_time_step=True in runtime_opts.F90)
                                                                                                  #   - modify micro_mg1_0.F90 to presribed Nc 
 #--- set folders
-set WRKDIR = /work/yihsuan123/taiesm_scm/${exp_name}/
+set WRKDIR = /work/yihsuan123/taiesm_work/
 set BLDDIR = $WRKDIR/$CASE/bld
 set RUNDIR = $WRKDIR/$CASE/run
 mkdir -p $BLDDIR || exit 1
 mkdir -p $RUNDIR || exit 1
+
+#--- back up this script and scam_mods in $BLDDIR
+set this_script = "$0"
+set script_name = "zz-run_scam.csh.$date_now"
+cp $this_script $RUNDIR/$script_name || exit 1
+
+cp -r $SCAM_MODS "$RUNDIR/zz-scam_mods.$date_now" || exit 1
 
 #--- back up this script and scam_mods in $BLDDIR
 set this_script = "$0"
