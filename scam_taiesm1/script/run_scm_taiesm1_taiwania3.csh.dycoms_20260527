@@ -154,12 +154,13 @@ set surf_flux = "psflx"
 #set CASE = "${exp_name}.${iopname}_${iop_input}.macrop_${macrop_scheme}.${ncdata}.${temp}"
 #set CASE = "${exp_name}.${iopname}_${iop_input}.dt_${dtime}.macrop_${macrop_scheme}.${temp}.nc1e9"
 #set CASE = "n1_${exp_name}.${iopname}_${iop_input}.${ncdata}.macrop_${macrop_scheme}.a2l_10"
+set CASE = "n1_${exp_name}.${iopname}_${iop_input}.${ncdata}.macrop_${macrop_scheme}.rhcrit_95"
 #set CASE = "n1_${exp_name}.${iopname}_${iop_input}.${ncdata}.macrop_${macrop_scheme}.rhcrit_99"
 #set CASE = "n1_${exp_name}.${iopname}_${iop_input}.${ncdata}.macrop_${macrop_scheme}"
 #set CASE = "n1_${exp_name}.${iopname}_${iop_input}.${ncdata}.macrop_${macrop_scheme}.no_ql_diff"
 #set CASE = "n1_${exp_name}.${iopname}_${iop_input}.${ncdata}.macrop_${macrop_scheme}.mod_ql_ed_0x"
 #set CASE = "n1_${exp_name}.${iopname}_${iop_input}.${ncdata}.macrop_${macrop_scheme}.mod_ql_ed_0.5x"
-set CASE = "n1_${exp_name}.${iopname}_${iop_input}.${ncdata}.macrop_${macrop_scheme}.mod_ql_ed_below_cld_0"
+#set CASE = "n1_${exp_name}.${iopname}_${iop_input}.${ncdata}.macrop_${macrop_scheme}.mod_ql_ed_below_cld_0"
 #set CASE = "xx1_${exp_name}.${iopname}_${iop_input}.${ncdata}.macrop_${macrop_scheme}.mod_ql_ed.${temp}"
 
 set hfilename_head = $CASE
@@ -167,9 +168,9 @@ set hfilename_head = $CASE
 #--- set the folder that contains modifed codes
 #set SCAM_MODS = /home/yihsuan123/research/TaiESM1_Sc_diag/scam_taiesm1/script/scam_mods         # put the modifed files in this folder
 #set SCAM_MODS = /home/yihsuan123/research/TaiESM1_Sc_diag/scam_taiesm1/script/scam_mods.old_20250501         # put the modifed files in this folder
-#set SCAM_MODS = /home/yihsuan123/research/TaiESM1_Sc_diag/scam_taiesm1/script/scam_mods.dycoms.rhcrit    # change rhcrit, macro_triangPDF_2D.F90
+set SCAM_MODS = /home/yihsuan123/research/TaiESM1_Sc_diag/scam_taiesm1/script/scam_mods.dycoms.rhcrit    # change rhcrit, macro_triangPDF_2D.F90
 #set SCAM_MODS = /home/yihsuan123/research/TaiESM1_Sc_diag/scam_taiesm1/script/scam_mods.dycoms.a2l       # change a2l, eddy_diff.F90
-set SCAM_MODS = /home/yihsuan123/research/TaiESM1_Sc_diag/scam_taiesm1/script/scam_mods.dycoms.mod_ql_ed  # change kvq_switch, diffusion_solver.F90
+#set SCAM_MODS = /home/yihsuan123/research/TaiESM1_Sc_diag/scam_taiesm1/script/scam_mods.dycoms.mod_ql_ed  # change kvq_switch, diffusion_solver.F90
 #set SCAM_MODS = /home/yihsuan123/research/TaiESM1_Sc_diag/scam_taiesm1/script/scam_mods.dycoms   # scam_mods.dycoms
                                                                                                  #   - no solar radiation (do_no_solar=True in radiation.F90)
                                                                                                  #   - radiation scheme is called at every time step 
@@ -194,7 +195,8 @@ else
 endif
 
 #--- set folders
-set WRKDIR = /work/yihsuan123/taiesm_scm/${exp_name}/
+#set WRKDIR = /work/yihsuan123/taiesm_scm/${exp_name}/
+set WRKDIR = /work/yihsuan123/taiesm_work/
 set BLDDIR = $WRKDIR/$CASE/bld
 set RUNDIR = $WRKDIR/$CASE/run
 mkdir -p $BLDDIR || exit 1
@@ -203,9 +205,9 @@ mkdir -p $RUNDIR || exit 1
 #--- back up this script and scam_mods in $BLDDIR
 set this_script = "$0"
 set script_name = "zz-run_scam.csh.$date_now"
-cp $this_script $BLDDIR/$script_name || exit 1
+cp $this_script $RUNDIR/$script_name || exit 1
 
-cp -r $SCAM_MODS "$BLDDIR/zz-scam_mods.$date_now" || exit 1
+cp -r $SCAM_MODS "$RUNDIR/zz-scam_mods.$date_now" || exit 1
 
 #--- not use sbatch
 #set this_script = "`pwd`/$0"
