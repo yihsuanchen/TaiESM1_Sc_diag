@@ -206,21 +206,29 @@
     ! kvq_switch = 0 : No modifications (Original baseline model)
     ! kvq_switch = 1 : Multiply kvq_active by a uniform factor, kvq_factor_ql (e.g., 0.5)
     ! kvq_switch = 2 : Zero out kvq_active below the a certain height
-    integer, parameter :: kvq_switch = 2
+    integer, parameter :: kvq_switch = 1 
+    !logical :: do_printout = .true.
+    logical :: do_printout = .false.
 
     integer,  intent(in), optional  :: ixcldliq
     real(r8) :: kvq_active(pcols,pver+1)
 
     !--- kvq_switch = 1 
-    !real(r8), parameter :: kvq_factor_ql = 0._r8
-    real(r8), parameter :: kvq_factor_ql = 0.5_r8
+      !real(r8), parameter :: kvq_factor_ql = 0._r8
+      !real(r8), parameter :: kvq_factor_ql = 0.1_r8
+      real(r8), parameter :: kvq_factor_ql = 0.25_r8
+      !real(r8), parameter :: kvq_factor_ql = 0.5_r8
 
     !--- kvq_switch = 2 
-    real(r8) :: kvq_zero_hgt(pcols)
-    real(r8) :: cld_base_hgt(pcols)
-    real(r8), parameter :: ql_threshold = 1.E-6_r8  ! threshold to determine cloud base
+      real(r8) :: kvq_zero_hgt(pcols)
+      real(r8) :: cld_base_hgt(pcols)
 
-    logical :: do_printout = .true.
+      ! opt_kvq_zero_hgt = 0 or other : kvq_zero_hgt is one level below cld_base_hgt
+      ! opt_kvq_zero_hgt = 1          : kvq_zero_hgt is as the same as cld_base_hgt
+      !integer, parameter :: opt_kvq_zero_hgt = 0   
+      integer, parameter :: opt_kvq_zero_hgt = 1   
+      real(r8), parameter :: ql_threshold = 1.E-6_r8  ! threshold to determine cloud base
+
     !---> yhc, 2026-05-27 
 
     ! ---------------------- !
@@ -776,11 +784,19 @@
                     do k = pver, 1, -1
                        if (q(i,k,ixcldliq) > ql_threshold) then
                           cld_base_hgt(i) = zi(i, k+1)
-                          kvq_zero_hgt(i) = zi(i, k+2)  ! one level below the cloud base
-                          !kvq_zero_hgt(i) = zi(i, pver+1)
+
+                          if (opt_kvq_zero_hgt .eq. 1) then
+                            kvq_zero_hgt(i) = cld_base_hgt(i)  ! same as the cloud base
+                          else
+                            kvq_zero_hgt(i) = zi(i, k+2)  ! one level below the cloud base
+                          endif
+ 
                           exit 
                        end if
                     end do
+                    if (do_printout) write (iulog, *) 'cldliq', q(i,:,ixcldliq)
+                    if (do_printout) write (iulog, *) 'zi', zi(i,:)
+                    if (do_printout) write (iulog, *) 'cld_base_hgt, kvq_zero_hgt', cld_base_hgt(i), kvq_zero_hgt(i)
                  end do
 
                  ! Suppress tracer transport dynamics exclusively beneath cloud levels
@@ -793,6 +809,9 @@
                        end if
                     end do
                  end do
+
+                 if (do_printout) write (iulog, *) 'switch=2, kvq_original', kvq
+                 if (do_printout) write (iulog, *) 'switch=2, kvq_modified', kvq_active
 
               case default
                  ! SWITCH = 0: Baseline un-modified mode
