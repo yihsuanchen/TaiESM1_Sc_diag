@@ -73,14 +73,17 @@ WRKDIR="$workdir/taiesm1_test_hindcast/"
 #srcmod_dir="/home/yihsuan123/research/TaiESM1_Sc_diag/hindcast/script/src.cam"
 #CASENAME="qq02_macrop-hindcast-taiesm1.F_2000_TAI.f09_f09"
 
-srcmod_dir="/home/yihsuan123/research/TaiESM1_Sc_diag/hindcast/script/src.cam.UW_PBL.a2l_50"
-CASENAME="qq02_turb_a2l_50-hindcast-taiesm1.F_2000_TAI.f09_f09"
+#srcmod_dir="/home/yihsuan123/research/TaiESM1_Sc_diag/hindcast/script/src.cam.UW_PBL.a2l_50"
+#CASENAME="qq02_turb_a2l_50-hindcast-taiesm1.F_2000_TAI.f09_f09"
 
 #srcmod_dir="/home/yihsuan123/research/TaiESM1_Sc_diag/hindcast/script/src.cam.GTS_rhcrit0.7"
 #CASENAME="qq02_rhcrit_70-hindcast-taiesm1.F_2000_TAI.f09_f09"
 
-srcmod_dir="/home/yihsuan123/research/TaiESM1_Sc_diag/hindcast/script/src.cam.GTS_rhcrit0.99"
-CASENAME="qq02_rhcrit_99-hindcast-taiesm1.F_2000_TAI.f09_f09"
+#srcmod_dir="/home/yihsuan123/research/TaiESM1_Sc_diag/hindcast/script/src.cam.GTS_rhcrit0.99"
+#CASENAME="qq02_rhcrit_99-hindcast-taiesm1.F_2000_TAI.f09_f09"
+
+srcmod_dir="/home/yihsuan123/research/TaiESM1_Sc_diag/hindcast/script/src.cam.UW_PBL.mod_ql_ed_0.1x"
+CASENAME="qq02_mod_ql_ed_0.1x-hindcast-taiesm1.F_2000_TAI.f09_f09"
 
 CASE="$WRKDIR/$CASENAME"
 

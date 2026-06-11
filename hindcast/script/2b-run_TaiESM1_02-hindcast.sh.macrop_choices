@@ -56,12 +56,14 @@ WRKDIR="$workdir/taiesm1_test_hindcast/"
 #CASENAME="y1-hindcast_2001July-taiesm1.F_2000_TAI.f09_f09.0327_2045"
 #CASENAME="xx-hindcast03-taiesm1.F_2000_TAI.f09_f09"
 
-CASENAME="qq02_macrop-hindcast-taiesm1.F_2000_TAI.f09_f09"
+#CASENAME="qq02_macrop-hindcast-taiesm1.F_2000_TAI.f09_f09"
 #CASENAME="qq02_turb_a2l_10-hindcast-taiesm1.F_2000_TAI.f09_f09"
 #CASENAME="qq02_turb_a2l_50-hindcast-taiesm1.F_2000_TAI.f09_f09"
 #CASENAME="qq02_rhcrit_95-hindcast-taiesm1.F_2000_TAI.f09_f09"
 #CASENAME="qq02_rhcrit_70-hindcast-taiesm1.F_2000_TAI.f09_f09"
-CASENAME="qq02_rhcrit_99-hindcast-taiesm1.F_2000_TAI.f09_f09"
+#CASENAME="qq02_rhcrit_99-hindcast-taiesm1.F_2000_TAI.f09_f09"
+#CASENAME="qq02_mod_ql_ed_0.1x-hindcast-taiesm1.F_2000_TAI.f09_f09"
+CASENAME="x1_qq02_CTL-hindcast-taiesm1.F_2000_TAI.f09_f09"
 
 CASE="$WRKDIR/$CASENAME"
 
@@ -69,9 +71,9 @@ CASE="$WRKDIR/$CASENAME"
 icdata_option="ERA5"
 #icdata_option="JRA3Q"
 
-#macrop_scheme="tpdf"
+macrop_scheme="tpdf"
 #macrop_scheme="updf"
-macrop_scheme="park"
+#macrop_scheme="park"
 #hfilename_head="macro_${macrop_scheme}.${icdata_option}"
 hfilename_head="macro_${macrop_scheme}.${icdata_option}"
 
@@ -98,8 +100,8 @@ do_pause="T"
 #do_pause="F"
 
 #--- hold if there is any unfinished job.
-do_hold="T"
-#do_hold="F"
+#do_hold="T"
+do_hold="F"
 
 hold_seconds=$((60 * 1))   # seconds   
 #hold_seconds=$((1 * 1))   # seconds   
