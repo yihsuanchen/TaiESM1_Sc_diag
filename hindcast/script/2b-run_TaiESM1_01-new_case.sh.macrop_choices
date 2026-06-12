@@ -82,8 +82,15 @@ WRKDIR="$workdir/taiesm1_test_hindcast/"
 #srcmod_dir="/home/yihsuan123/research/TaiESM1_Sc_diag/hindcast/script/src.cam.GTS_rhcrit0.99"
 #CASENAME="qq02_rhcrit_99-hindcast-taiesm1.F_2000_TAI.f09_f09"
 
-srcmod_dir="/home/yihsuan123/research/TaiESM1_Sc_diag/hindcast/script/src.cam.UW_PBL.mod_ql_ed_0.1x"
-CASENAME="qq02_mod_ql_ed_0.1x-hindcast-taiesm1.F_2000_TAI.f09_f09"
+#srcmod_dir="/home/yihsuan123/research/TaiESM1_Sc_diag/hindcast/script/src.cam.UW_PBL.mod_ql_ed_0.1x"
+#CASENAME="qq02_mod_ql_ed_0.1x-hindcast-taiesm1.F_2000_TAI.f09_f09"
+
+#ss1="mod_ql_ed_0.0x"
+#ss1="mod_ql_ed_0.5x"
+#ss1="mod_ql_ed_cbP1_surf_0"
+ss1="mod_ql_ed_cb_surf_0"
+srcmod_dir="/home/yihsuan123/research/TaiESM1_Sc_diag/hindcast/script/src.cam.UW_PBL.${ss1}"
+CASENAME="qq02_${ss1}-hindcast-taiesm1.F_2000_TAI.f09_f09"
 
 CASE="$WRKDIR/$CASENAME"
 

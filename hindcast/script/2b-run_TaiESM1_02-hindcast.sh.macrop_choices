@@ -63,7 +63,12 @@ WRKDIR="$workdir/taiesm1_test_hindcast/"
 #CASENAME="qq02_rhcrit_70-hindcast-taiesm1.F_2000_TAI.f09_f09"
 #CASENAME="qq02_rhcrit_99-hindcast-taiesm1.F_2000_TAI.f09_f09"
 #CASENAME="qq02_mod_ql_ed_0.1x-hindcast-taiesm1.F_2000_TAI.f09_f09"
-CASENAME="x1_qq02_CTL-hindcast-taiesm1.F_2000_TAI.f09_f09"
+#CASENAME="x1_qq02_CTL-hindcast-taiesm1.F_2000_TAI.f09_f09"
+
+#CASENAME="qq02_mod_ql_ed_0.0x-hindcast-taiesm1.F_2000_TAI.f09_f09"
+#CASENAME="qq02_mod_ql_ed_0.5x-hindcast-taiesm1.F_2000_TAI.f09_f09"
+#CASENAME="qq02_mod_ql_ed_cbP1_surf_0-hindcast-taiesm1.F_2000_TAI.f09_f09"
+CASENAME="qq02_mod_ql_ed_cb_surf_0-hindcast-taiesm1.F_2000_TAI.f09_f09"
 
 CASE="$WRKDIR/$CASENAME"
 
