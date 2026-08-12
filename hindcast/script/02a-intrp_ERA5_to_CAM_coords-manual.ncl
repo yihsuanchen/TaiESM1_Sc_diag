@@ -3,9 +3,9 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/wrf/WRFUserARW.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_csm.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/contributed.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/shea_util.ncl"
-load "/lfs/home/yihsuanc/scripts/ncl//ignorantNCL.ncl"
+;load "/lfs/home/yihsuanc/scripts/ncl//ignorantNCL.ncl"
 ;load "./ignorantNCL.ncl"
-load "/lfs/home/yihsuanc/scripts/ncl//ignorantNCL-colormaps.ncl"
+;load "/lfs/home/yihsuanc/scripts/ncl//ignorantNCL-colormaps.ncl"
 ;load "zz-read_parameters.ncl"
 
 begin
@@ -32,13 +32,17 @@ begin
     do_writeout = True
 
     ;--- input arguments
-    datapath = "~/data/data.TaiESM1_hindcast/data.ERA5.July2001.hindcast/"
-    date_nc = "2001_07_11_12Z"
+    ;datapath = "~/data/data.TaiESM1_hindcast/data.ERA5.July2001.hindcast/"
+    datapath = "/work1/yihsuan123/data/data.TaiESM1_hindcast/data.ERA5.Jul2001.hindcast/"  ; F1
+    date_nc = "2001_07_07_00Z"
     filename_prs = datapath+"ERA5_PRS.t_q_u_v.r1440x721."+date_nc+".nc"
     filename_sfc = datapath+"ERA5_SFC.sp.r1440x721."+date_nc+".nc"
 
-    outfile_ref="/lfs/home/yihsuanc/data/data.TaiESM1_hindcast/data.cami_template/cami-snap_0000-01-01_0.9x1.25_L30_c100618.nc"
-    filename_out = "./cami-snap_0000-01-01_0.9x1.25_L30.ERA5_ic."+date_nc+".nc"
+    ;outfile_ref="/lfs/home/yihsuanc/data/data.TaiESM1_hindcast/data.cami_template/cami-snap_0000-01-01_0.9x1.25_L30_c100618.nc"  ; L30 cami
+    ;filename_out = "./cami-snap_0000-01-01_0.9x1.25_L30.ERA5_ic."+date_nc+".nc"
+
+    outfile_ref=datapath+"f.e20.FWAMIP.f09_f09.134.1975.009.cam.i.2010-01-01_56L_c170403.nc"  ; L56 cami
+    filename_out = "./cami-snap_0000-01-01_0.9x1.25_L56.ERA5_ic."+date_nc+".nc"
     ;filename_cami = "cami-mam3_0000-01-01_0.9x1.25_L30_c100618.nc"
     ;filename_out = "zz1.nc"   ; the file content is same as filename_cami
 
