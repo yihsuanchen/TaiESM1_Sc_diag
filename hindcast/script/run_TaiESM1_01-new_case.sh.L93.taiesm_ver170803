@@ -1,0 +1,218 @@
+#!/bin/bash 
+#===================================
+#  Bourne-Again shell script
+#
+#  Description:
+#    Run TaiESM1 simulation on Taiwania 3 (twnia3) or Forerunner 1 (f1) 
+#
+#  Usage:
+#    Edit the "user setting" section, and then execute this script
+#    > ./THIS_SCRIPT
+#
+#    The case folder will be at $CASE
+#    The output will be at /work/$USER/taiesm_work/{CASENAME}
+#
+#  Resource:
+#    F1 Userguide: https://man.twcc.ai/@f1-manual/manual
+#
+#  Author:
+#    Yi-Hsuan Chen
+#    yihsuanc@gate.sinica.edu.tw
+#===================================
+
+###################
+# user setting
+###################
+
+#set -x  # echo all commands
+
+#--- set machine that is used in create_newcase, and username
+username="yihsuan123"
+
+mach="f1"
+#mach="T3"
+
+if [ $mach == "twnia3" ]; then
+  #workdir="/work/$username/"
+  workdir="/work/$username/taiesm_work/"
+  queue="ct224"        # name of queue on Taiwania 3. Use "sinfo -s" to view the available queue
+elif [ $mach == "f1" ]; then
+  #workdir="/work1/$username/"
+  workdir="/work1/$username/taiesm_work/"
+  #queue="ct112"        # name of queue on F1. Use "sinfo -s" to view the available queue
+  queue="development"   
+  module purge 
+  module use /home/j07cyt00/codecs/modulefiles
+else
+  echo "ERROR: machine [$mach] is not supported"
+  exit 1
+fi
+
+# temp variable
+temp=`date +%m%d_%H%M`
+yyyymmdd=`date +%Y_%m_%d`
+
+#--- TaiESM source code folder
+CCSMROOT="/work1/yihsuan123/taiesm_ver170803/"  # on f1, copy from /home/j07hsu00/taiesm/ver170803
+#CCSMROOT="/home/j07hsu00/taiesm/TaiESM_1"  # set on 2026/04/21
+
+#--- simulation setup
+compset="F_2000_TAI"
+res="f09_f09"
+
+STOP_OPTION="ndays"
+STOP_N=6
+#STOP_N=1
+
+#--- simulation case
+WRKDIR="$workdir"
+#CASENAME="xx01-taiesm1.${compset}.${res}.${temp}"
+#CASENAME="y1-hindcast_2001July-taiesm1.${compset}.${res}.${temp}"
+#CASENAME="hindcast02_2001July-taiesm1.${compset}.${res}"
+#CASENAME="hindcast03-taiesm1.${compset}.${res}"
+#CASENAME="hindcast03-taiesm1.${compset}.${res}.${temp}"
+#CASENAME="xx-hindcast03-taiesm1.${compset}.${res}"
+#CASENAME="hindcast03-taiesm1.${compset}.${res}"
+#CASENAME="xx-hindcast03_default-taiesm1.${compset}.${res}.L56.${temp}"
+#CASENAME="xx-hindcast03_ncERA-taiesm1.${compset}.${res}.L56.${temp}"
+#CASENAME="xx-hindcast03_ncERA_refdate-taiesm1.${compset}.${res}.L56.${temp}"
+#CASENAME="xx1-taiesm1_hindcast_L30_ncERA.${compset}.${res}.${temp}"
+#CASENAME="xx2-taiesm1_hindcast_L30_ncERA.startup.${compset}.${res}.${temp}"
+#CASENAME="xx2-taiesm1_v17_hindcast_L30_ncERA.${compset}.${res}.${temp}"
+#CASENAME="xx2-taiesm1_v17_hindcast_L56_ncERA.${compset}.${res}.${temp}"
+#CASENAME="qq02_L56-hindcast-taiesm1.F_2000_TAI.f09_f09.${temp}"
+#CASENAME="qq02_L56-hindcast-taiesm1.F_2000_TAI.f09_f09"
+#CASENAME="qq02_L93-hindcast-taiesm1.F_2000_TAI.f09_f09.${temp}"
+CASENAME="qq02_L93-hindcast-taiesm1.F_2000_TAI.f09_f09"
+CASE="$WRKDIR/$CASENAME"
+
+#--- slurm setup
+#do_submit="T"        # "T": submit the job
+do_submit="F"        # "T": submit the job
+
+#account="MST112228"  # account name on Taiwania 3
+#account="MST113255"  # account name on Taiwania 3  # update on 2025/03/27
+#account="MST111414"   # TCCIP, 2026/04/21
+account="MST115250"   # 
+num_cpu=128          # number of cpu
+
+#--- source code change
+do_srcmod="T"
+#srcmod_dir="/home/yihsuan123/research/TaiESM1_Sc_diag/scam_taiesm1/script/scam_mods"
+srcmod_dir="/home/yihsuan123/research/TaiESM1_Sc_diag/hindcast/script/src.cam"
+
+##################
+# program start
+##################
+
+#--- get this script name
+date_now=`date +%m%d_%H%M`
+this_script="`pwd`/$0"
+script_backup="$CASE/zz-run_TaiESM1_01-new_case.${CASENAME}.sh.${date_now}"
+
+#--- check whether $srcmod_dir exist
+if [ $do_srcmod == "T" ]; then
+  if [ ! -d $srcmod_dir ]; then
+    echo "ERROR: srcmod_dir [$srcmod_dir] does not exist. STOP"
+    exit 1
+  fi
+fi
+
+#------------
+# Build the model
+#  ./create_newcase
+#  ./cesm_setup
+#  ./${casename}.build
+#------------
+
+cd $CCSMROOT/scripts  || exit 1
+
+#--- create_newcase
+if [ $mach == "twnia3" ]; then
+  ./create_newcase -case ${CASE} -mach ${mach} -compset ${compset} -res ${res} || exit 1
+elif [ $mach == "f1" ]; then
+  ./create_newcase -case ${CASE} -mach ${mach} -compset ${compset} -res ${res} -mpilib impi -compiler intel || exit 1
+fi
+
+cd $CASE || exit 1
+
+#--- user settings
+
+# Set computational geometry: number of processors to allocate to each model
+./xmlchange -file env_mach_pes.xml -id NTASKS_ATM -val $num_cpu || exit 300
+./xmlchange -file env_mach_pes.xml -id NTASKS_LND -val $num_cpu || exit 300
+./xmlchange -file env_mach_pes.xml -id NTASKS_ICE -val $num_cpu || exit 300
+./xmlchange -file env_mach_pes.xml -id NTASKS_OCN -val $num_cpu || exit 300
+./xmlchange -file env_mach_pes.xml -id NTASKS_CPL -val $num_cpu || exit 300
+./xmlchange -file env_mach_pes.xml -id NTASKS_ROF -val $num_cpu || exit 300
+./xmlchange -file env_mach_pes.xml -id NTASKS_GLC -val $num_cpu || exit 300
+
+./xmlchange -file env_run.xml -id STOP_OPTION -val ${STOP_OPTION} || exit 300
+./xmlchange -file env_run.xml -id STOP_N -val ${STOP_N}           || exit 300
+
+#--- start up
+#./xmlchange -file env_run.xml -id RUN_TYPE -val "startup" || exit 300
+#./xmlchange -file env_run.xml -id RUN_REFCASE -val "case.std" || exit 300
+#./xmlchange -file env_run.xml -id GET_REFCASE -val "FALSE" || exit 300
+
+./xmlchange -file env_build.xml -id CAM_CONFIG_OPTS  -val "-phys cam5 -chem trop_snap -taiphy -nlev 93" || exit 300  # L56 settings
+
+# 
+./xmlchange -file env_run.xml -id RUN_REFDATE   -val 2001-07-07         || exit 300
+./xmlchange -file env_run.xml -id RUN_STARTDATE -val 2001-07-07         || exit 300
+./xmlchange -file env_run.xml -id RUN_REFTOD  -val 0          || exit 300
+./xmlchange -file env_run.xml -id START_TOD   -val 0          || exit 300
+
+hfilename_head="ERA5"
+current_date=20010707
+
+#--- Modify run_TaiESM1_02-hindcast.sh to set namelist parameters because namelist will be recreated.
+cat > ./user_nl_cam << EOF
+&cam_inparm
+ncdata = '/work1/yihsuan123/data/data.TaiESM1_hindcast/data.ERA5.Jul2001.hindcast/cami-snap_0000-01-01_0.9x1.25_L93.ERA5_ic.2001_07_07_00Z.nc'
+nhtfrq = -1, -3, -3, -3
+mfilt  = 24, 8, 8, 8
+empty_htapes = .true. 
+hfilename_spec = "%c.${hfilename_head}_icdate_${current_date}.cam.h%t_2d_1h.%y-%m-%d-%s.nc", "%c.${hfilename_head}_icdate_${current_date}.cam.h%t_state_3h.%y-%m-%d-%s.nc","%c.${hfilename_head}_icdate_${current_date}.cam.h%t_Ttend_3h.%y-%m-%d-%s.nc", "%c.${hfilename_head}_icdate_${current_date}.cam.h%t_Qtend_3h.%y-%m-%d-%s.nc"
+
+fincl1 = "CLDHGH:A","CLDLOW:A","CLDMED:A","CLDTOT:A","FLDS:A","FLNS:A","FLNSC:A","FLUT:A","FLUTC:A","FSDS:A","FSDSC:A","FSNS:A","FSNSC:A","FSNTOA:A","FSNTOAC:A","FSUTOA:A","LHFLX:A","LWCF:A","PBLH:A","PRECC:A","PRECL:A","PS:A","QREFHT:A","SHFLX:A","SOLIN:A","SWCF:A","TREFHT:A","TS:A","U10:A","Z3:A","TGCLDIWP:A","TGCLDLWP:A","CONCLD:A","TMQ:A","AST:A","SST:A"
+
+fincl2 = "CLDICE:A", "CLDLIQ:A", "CLOUD:A", "OMEGA:A","PS:A", "Q:A", "T:A", "U:A", "V:A", "Z3:A", "RELHUM:A", "KVH:A", "KVM:A"
+
+fincl3 = "PS:A", "TTEND_TOT:A","DTCORE:A","PTTEND:A","ZMDT:A","EVAPTZM:A","FZSNTZM:A","EVSNTZM:A","ZMMTT:A","CMFDT:A","DPDLFT:A","SHDLFT:A", "MACPDT:A","MPDT:A","QRL:A","QRS:A","DTV:A","TTGWORO:A"
+
+fincl4 = "PS:A", "PTEQ:A","ZMDQ:A","EVAPQZM:A","CMFDQ:A","MACPDQ:A","MPDQ:A","VD01:A", "PTECLDLIQ:A","ZMDLIQ:A","CMFDLIQ:A","DPDLFLIQ:A","SHDLFLIQ:A","MACPDLIQ:A","MPDLIQ:A","VDCLDLIQ:A","PTECLDICE:A","ZMDICE:A","CMFDICE:A","DPDLFICE:A","SHDLFICE:A","MACPDICE:A","MPDICE:A","VDCLDICE:A","QVTEND_TOT:A","QLTEND_TOT:A","QITEND_TOT:A","DQVCORE:A","DQLCORE:A","DQICORE:A"
+/
+EOF
+#ncdata = '/work1/yihsuan123/data/data.TaiESM1_hindcast/data.ERA5.Jul2001.hindcast/cami-snap_0000-01-01_0.9x1.25_L30.ERA5_ic.2001_07_07_00Z.nc'
+#ncdata = '/home/j07hsu00/runs/cesm/inputdata/atm/cam/inic/fv/f.e20.FWAMIP.f09_f09.134.1975.009.cam.i.2010-01-01_56L_c170403.nc'
+
+#--- source code change
+if [ $do_srcmod == "T" ]; then
+  cp $srcmod_dir/* ./SourceMods/src.cam && echo "Done. copy codes from [$srcmod_dir] to [./SourceMods/src.cam]" || exit 301
+fi
+
+#--- cesm_setup
+./cesm_setup  || exit 1
+ 
+#--- build the model
+./$CASENAME.build || exit 1
+
+#--- modify the slurm setup
+sed -i "s/#SBATCH -p.*/#SBATCH -p ${queue}/g" $CASENAME.run && echo "Done. queue is [${queue}]" || exit 305
+
+sed -i "s/#SBATCH --account.*/#SBATCH --account ${account}/g" $CASENAME.run && echo "Done. account is [${account}]" || exit 305
+
+#--- submit the run
+if [ $do_submit == "T" ]; then
+  ./$CASENAME.submit || exit 1
+else
+  echo "Please submit the job manually at [$CASE]"
+  echo "For hindcast simulations, please submit the runs using run_TaiESM1_02-hindcast.sh"
+fi
+
+#--- back up this script
+cp $this_script $script_backup && echo "Done. backup of the script [${script_backup}]" || exit 1
+
+exit 0
+
