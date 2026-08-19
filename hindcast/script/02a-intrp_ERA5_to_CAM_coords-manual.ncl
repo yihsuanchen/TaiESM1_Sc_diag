@@ -41,8 +41,13 @@ begin
     ;outfile_ref="/lfs/home/yihsuanc/data/data.TaiESM1_hindcast/data.cami_template/cami-snap_0000-01-01_0.9x1.25_L30_c100618.nc"  ; L30 cami
     ;filename_out = "./cami-snap_0000-01-01_0.9x1.25_L30.ERA5_ic."+date_nc+".nc"
 
-    outfile_ref=datapath+"f.e20.FWAMIP.f09_f09.134.1975.009.cam.i.2010-01-01_56L_c170403.nc"  ; L56 cami
-    filename_out = "./cami-snap_0000-01-01_0.9x1.25_L56.ERA5_ic."+date_nc+".nc"
+    ;outfile_ref=datapath+"f.e20.FWAMIP.f09_f09.134.1975.009.cam.i.2010-01-01_56L_c170403.nc"  ; L56 cami
+    ;filename_out = "./cami-snap_0000-01-01_0.9x1.25_L56.ERA5_ic."+date_nc+".nc"
+
+    ;outfile_ref=datapath+""  ; L93 cami
+    outfile_ref="./f09.F2000.L93.yhc.t03.cam.i.0002-01-01-00000.nc"
+    filename_out = "./cami-snap_0000-01-01_0.9x1.25_L93.ERA5_ic."+date_nc+".nc"
+
     ;filename_cami = "cami-mam3_0000-01-01_0.9x1.25_L30_c100618.nc"
     ;filename_out = "zz1.nc"   ; the file content is same as filename_cami
 
