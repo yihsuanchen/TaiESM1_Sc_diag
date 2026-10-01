@@ -1,0 +1,13 @@
+DYCOMS-II RF01 to RF02, LWP and cloud fraction
+
+#RF, LWP, cloud fraction
+
+RF01, 79.60, 1
+RF02, 137.80, 1
+RF03, 162.10, 1
+RF04, 225.80, 1
+RF05, 87.30, 1
+RF06, 169.40, 1
+RF07, 268.00, 1
+RF08, 120.50, 1
+RF09, 114.80, 1
